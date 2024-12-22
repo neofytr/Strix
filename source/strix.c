@@ -61,7 +61,7 @@ strix_t *strix_create(const char *str)
     return strix;
 }
 
-strix_t *strix_duplicate(strix_t *strix)
+strix_t *strix_duplicate(const strix_t *strix)
 {
     if (is_strix_empty_or_null(strix))
     {
@@ -113,9 +113,54 @@ bool strix_clear(strix_t *strix)
     return true;
 }
 
+strix_t *strix_concat(const strix_t *strix_one, const strix_t *strix_two)
+{
+    if (is_strix_null(strix_one) && !is_strix_null(strix_two))
+    {
+        return strix_duplicate(strix_two);
+    }
+
+    if (is_strix_null(strix_two) && !is_strix_null(strix_one))
+    {
+        return strix_duplicate(strix_one);
+    }
+
+    if (is_strix_null(strix_one) && is_strix_null(strix_two))
+    {
+        return NULL;
+    }
+
+    strix_t *new_strix = (strix_t *)allocate(sizeof(strix_t));
+    if (is_strix_null(new_strix))
+    {
+        return NULL;
+    }
+
+    new_strix->len = strix_one->len + strix_two->len;
+    new_strix->str = (char *)allocate(sizeof(char) * new_strix->len);
+
+    if (is_strix_str_null(new_strix))
+    {
+        return NULL;
+    }
+
+    if (!memcpy((void *)new_strix->str, (void *)strix_one->str, strix_one->len))
+    {
+        return NULL;
+    }
+
+    if (!memcpy((void *)(new_strix->str + strix_one->len), (void *)strix_two->str, strix_two->len))
+    {
+        return NULL;
+    }
+
+    return new_strix;
+}
+
 int main(void)
 {
     strix_t *strix = strix_create("hello");
-    strix_modify(strix, "world");
-    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
+    strix_t *another = strix_create(", world!");
+    strix_t *concat = strix_concat(strix, another);
+    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(concat));
 }
