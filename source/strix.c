@@ -418,6 +418,54 @@ bool strix_erase(strix_t *strix, size_t len, size_t pos)
     return true;
 }
 
+char strix_at(const strix_t *strix, size_t index)
+{
+    if (is_strix_null(strix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return -1;
+    }
+
+    if (index >= strix->len)
+    {
+        strix_errno = STRIX_ERR_OUT_OF_BOUNDS_ACCESS;
+        return -1;
+    }
+
+    strix_errno = STRIX_SUCCESS;
+    return strix->str[index];
+}
+
+int strix_equal(const strix_t *strix_one, const strix_t *strix_two)
+{
+    if (is_strix_null(strix_one) || is_strix_null(strix_two))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return -1;
+    }
+
+    if (is_strix_str_null(strix_one) || is_strix_str_null(strix_two))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return -1;
+    }
+
+    if (strix_one->len != strix_two->len)
+    {
+        return 1;
+    }
+
+    strix_errno = STRIX_SUCCESS;
+
+    size_t len = strix_one->len;
+    if (!strncmp(strix_one->str, strix_two->str, len))
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
 int main(void)
 {
     strix_t *strix = strix_create("hello");
@@ -460,6 +508,7 @@ int main(void)
     fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
     strix_erase(strix, 100, 3);
     fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
+    fprintf(stdout, "%d\n", strix_equal(strix_create("hello"), strix_create("hello\n")));
 
     strix_free(strix);
     strix_free(world);
