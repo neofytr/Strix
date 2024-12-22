@@ -17,6 +17,7 @@ typedef struct
 #define STRIX_PRINT(string) (int)(string)->len, (string)->str
 
 strix *strix_create(const char *str);
+strix *strix_duplicate(strix *string); // returns a null strix if string is of length 0
 
 void *strix_free(strix *string);
 

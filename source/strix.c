@@ -28,6 +28,39 @@ strix *strix_create(const char *str)
     return string;
 }
 
+strix *strix_duplicate(strix *string)
+{
+    if (!string)
+    {
+        return NULL;
+    }
+
+    if (!string->len)
+    {
+        return NULL;
+    }
+
+    strix *duplicate = (strix *)allocate(sizeof(strix));
+    if (!duplicate)
+    {
+        return NULL;
+    }
+
+    duplicate->len = string->len;
+    duplicate->str = (char *)allocate(sizeof(duplicate->len));
+    if (!duplicate->str)
+    {
+        return NULL;
+    }
+
+    if (!memcpy(duplicate->str, string->str, string->len))
+    {
+        return NULL;
+    }
+
+    return duplicate;
+}
+
 void *strix_free(strix *string)
 {
     deallocate(string->str);
@@ -36,6 +69,7 @@ void *strix_free(strix *string)
 
 int main(void)
 {
-    strix *string = conv_to_strix("hello");
+    strix *string = strix_create("hello");
+    strix *new = strix_duplicate(string);
     fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(string));
 }
