@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "allocator/allocator.h"
+#include "../allocator/allocator.h"
 
 typedef struct
 {
@@ -13,7 +13,10 @@ typedef struct
     size_t len;
 } strix;
 
-strix *conv_to_strix(const char *str);
+#define STRIX_FORMAT "%.*s"
+#define STRIX_PRINT(string) (int)(string)->len, (string)->str
+
+strix *strix_create(const char *str);
 
 void *strix_free(strix *string);
 
