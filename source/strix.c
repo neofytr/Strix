@@ -96,7 +96,7 @@ bool strix_modify(strix_t *strix, const char *str)
     return true;
 }
 
-void *strix_free(strix_t *strix)
+void strix_free(strix_t *strix)
 {
     deallocate(strix->str);
     deallocate(strix);
@@ -155,6 +155,29 @@ strix_t *strix_concat(const strix_t *strix_one, const strix_t *strix_two)
     }
 
     return new_strix;
+}
+
+strix_t *strix_append(strix_t *strix, const char *str)
+{
+    if (is_strix_null(strix) || is_str_null(str))
+    {
+        return NULL;
+    }
+
+    strix_t *new_strix = strix_create(str);
+    if (is_strix_null(new_strix))
+    {
+        return NULL;
+    }
+
+    strix_t *appended_strix = strix_concat(strix, new_strix);
+    if (is_strix_null(appended_strix))
+    {
+        return NULL;
+    }
+
+    strix_free(new_strix);
+    return appended_strix;
 }
 
 int main(void)
