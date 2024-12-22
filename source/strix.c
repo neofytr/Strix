@@ -1,35 +1,47 @@
 #include "../header/strix.h"
+#include <threads.h>
 
-static inline bool is_strix_null(const strix_t *strix);
-static inline bool is_str_null(const char *str);
-static inline bool is_strix_str_null(const strix_t *strix);
-static inline bool is_strix_empty(const strix_t *strix);
-static inline bool is_strix_empty_or_null(const strix_t *strix);
-static inline bool is_ptr_null(const void *ptr);
-
-static inline bool is_ptr_null(const void *ptr)
-{
-    return !ptr;
-}
+#include "../header/strix.h"
+#include "../header/strix_errno.h"
 
 static inline bool is_strix_null(const strix_t *strix)
 {
-    return !strix;
+    if (!strix)
+    {
+        strix_errno = STRIX_ERR_NULL_STRIX_PTR;
+        return true;
+    }
+    return false;
 }
 
 static inline bool is_str_null(const char *str)
 {
-    return !str;
+    if (!str)
+    {
+        strix_errno = STRIX_ERR_NULL_STRIX_PTR;
+        return true;
+    }
+    return false;
 }
 
 static inline bool is_strix_str_null(const strix_t *strix)
 {
-    return !strix->str;
+    if (!strix->str)
+    {
+        strix_errno = STRIX_ERR_NULL_STRIX_PTR;
+        return true;
+    }
+    return false;
 }
 
 static inline bool is_strix_empty(const strix_t *strix)
 {
-    return !strix->len;
+    if (!strix->len)
+    {
+        strix_errno = STRIX_ERR_EMPTY_STRING;
+        return true;
+    }
+    return false;
 }
 
 static inline bool is_strix_empty_or_null(const strix_t *strix)
@@ -39,151 +51,250 @@ static inline bool is_strix_empty_or_null(const strix_t *strix)
 
 strix_t *strix_create(const char *str)
 {
+    strix_errno = STRIX_SUCCESS;
+
     if (is_str_null(str))
     {
         return NULL;
     }
+
     strix_t *strix = (strix_t *)allocate(sizeof(strix_t));
-    if (is_strix_null(strix))
+    if (!strix)
     {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
         return NULL;
     }
+
     strix->len = strlen(str);
-    strix->str = (char *)allocate(strix->len);
-    if (is_strix_str_null(strix))
+    if (strix->len == 0)
     {
+        strix_errno = STRIX_ERR_EMPTY_STRING;
+        deallocate(strix);
         return NULL;
     }
+
+    strix->str = (char *)allocate(strix->len);
+    if (!strix->str)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        deallocate(strix);
+        return NULL;
+    }
+
     if (!memmove(strix->str, str, strix->len))
     {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        deallocate(strix->str);
+        deallocate(strix);
         return NULL;
     }
+
     return strix;
 }
 
 strix_t *strix_duplicate(const strix_t *strix)
 {
+    strix_errno = STRIX_SUCCESS;
+
     if (is_strix_empty_or_null(strix))
     {
         return NULL;
     }
+
     strix_t *duplicate = (strix_t *)allocate(sizeof(strix_t));
-    if (is_strix_null(duplicate))
+    if (!duplicate)
     {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
         return NULL;
     }
+
     duplicate->len = strix->len;
-    duplicate->str = (char *)allocate(sizeof(duplicate->len));
-    if (is_strix_str_null(duplicate))
+    duplicate->str = (char *)allocate(sizeof(char) * duplicate->len);
+    if (!duplicate->str)
     {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        deallocate(duplicate);
         return NULL;
     }
+
     if (!memcpy(duplicate->str, strix->str, strix->len))
     {
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        deallocate(duplicate->str);
+        deallocate(duplicate);
         return NULL;
     }
+
     return duplicate;
 }
 
 bool strix_modify(strix_t *strix, const char *str)
 {
+    strix_errno = STRIX_SUCCESS;
+
     if (is_strix_null(strix) || is_str_null(str))
     {
         return false;
     }
+
     strix_free(strix);
     strix = strix_create(str);
+    if (!strix)
+    {
+        return false;
+    }
     return true;
 }
 
 void strix_free(strix_t *strix)
 {
-    deallocate(strix->str);
+    if (!strix)
+        return;
+    if (strix->str)
+        deallocate(strix->str);
     deallocate(strix);
 }
 
 bool strix_clear(strix_t *strix)
 {
+    strix_errno = STRIX_SUCCESS;
+
     if (is_strix_null(strix))
     {
         return false;
     }
+
     strix->len = 0;
     deallocate(strix->str);
+    strix->str = NULL;
     return true;
 }
 
-strix_t *strix_concat(const strix_t *strix_one, const strix_t *strix_two)
+bool strix_concat(strix_t *dest, const strix_t *src)
 {
-    if (is_strix_null(strix_one) && !is_strix_null(strix_two))
+    strix_errno = STRIX_SUCCESS;
+
+    if (is_strix_null(dest))
     {
-        return strix_duplicate(strix_two);
+        return false;
     }
 
-    if (is_strix_null(strix_two) && !is_strix_null(strix_one))
+    if (is_strix_null(src))
     {
-        return strix_duplicate(strix_one);
+        return true; // nothing to concatenate, not an error
     }
 
-    if (is_strix_null(strix_one) && is_strix_null(strix_two))
+    size_t new_len = dest->len + src->len;
+    char *new_str = (char *)allocate(sizeof(char) * new_len);
+    if (!new_str)
     {
-        return NULL;
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
     }
 
-    strix_t *new_strix = (strix_t *)allocate(sizeof(strix_t));
-    if (is_strix_null(new_strix))
+    if (!memcpy(new_str, dest->str, dest->len))
     {
-        return NULL;
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        deallocate(new_str);
+        return false;
     }
 
-    new_strix->len = strix_one->len + strix_two->len;
-    new_strix->str = (char *)allocate(sizeof(char) * new_strix->len);
-
-    if (is_strix_str_null(new_strix))
+    if (!memcpy(new_str + dest->len, src->str, src->len))
     {
-        return NULL;
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        deallocate(new_str);
+        return false;
     }
 
-    if (!memcpy((void *)new_strix->str, (void *)strix_one->str, strix_one->len))
-    {
-        return NULL;
-    }
+    deallocate(dest->str);
+    dest->str = new_str;
+    dest->len = new_len;
 
-    if (!memcpy((void *)(new_strix->str + strix_one->len), (void *)strix_two->str, strix_two->len))
-    {
-        return NULL;
-    }
-
-    return new_strix;
+    return true;
 }
 
-strix_t *strix_append(strix_t *strix, const char *str)
+bool strix_append(strix_t *strix, const char *str)
 {
+    strix_errno = STRIX_SUCCESS;
+
     if (is_strix_null(strix) || is_str_null(str))
     {
-        return NULL;
+        return false;
     }
 
-    strix_t *new_strix = strix_create(str);
-    if (is_strix_null(new_strix))
+    size_t str_len = strlen(str);
+    if (str_len == 0)
     {
-        return NULL;
+        return true; // nothing to append, not an error
     }
 
-    strix_t *appended_strix = strix_concat(strix, new_strix);
-    if (is_strix_null(appended_strix))
+    size_t new_len = strix->len + str_len;
+    char *new_str = (char *)allocate(sizeof(char) * new_len);
+    if (!new_str)
     {
-        return NULL;
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
     }
 
-    strix_free(new_strix);
-    return appended_strix;
+    if (!memcpy(new_str, strix->str, strix->len))
+    {
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        deallocate(new_str);
+        return false;
+    }
+
+    if (!memcpy(new_str + strix->len, str, str_len))
+    {
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        deallocate(new_str);
+        return false;
+    }
+
+    deallocate(strix->str);
+    strix->str = new_str;
+    strix->len = new_len;
+
+    return true;
 }
 
 int main(void)
 {
     strix_t *strix = strix_create("hello");
-    strix_t *another = strix_create(", world!");
-    strix_t *concat = strix_concat(strix, another);
-    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(concat));
+    if (!strix)
+    {
+        strix_perror("Failed to create first string");
+        return 1;
+    }
+
+    strix_t *world = strix_create(", world!");
+    if (!world)
+    {
+        strix_perror("Failed to create second string");
+        strix_free(strix);
+        return 1;
+    }
+
+    if (!strix_concat(strix, world))
+    {
+        strix_perror("Failed to concatenate strings");
+        strix_free(strix);
+        strix_free(world);
+        return 1;
+    }
+
+    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
+
+    if (!strix_append(strix, "!!"))
+    {
+        strix_perror("Failed to append string");
+        strix_free(strix);
+        strix_free(world);
+        return 1;
+    }
+
+    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
+
+    strix_free(strix);
+    strix_free(world);
+    return 0;
 }

@@ -93,46 +93,34 @@ bool strix_modify(strix_t *strix, const char *str);
 bool strix_clear(strix_t *strix);
 
 /**
- * @brief Concatenates two strix_t structures into a new structure
+ * @brief Concatenates two strix_t structures, modifying the first one
  *
- * Creates a new strix_t containing the combined contents of both input structures.
+ * Modifies the first strix_t by appending the contents of the second strix_t.
  *
- * @param strix_one First strix_t to concatenate
- * @param strix_two Second strix_t to concatenate
- * @return strix_t* Pointer to new strix_t structure, or NULL on failure
+ * @param strix_dest Target strix_t to modify
+ * @param strix_src Source strix_t to append
+ * @return bool true on success, false on failure
  *
  * Edge cases:
- * - Returns NULL if both inputs are NULL
- * - Returns duplicate of strix_two if strix_one is NULL
- * - Returns duplicate of strix_one if strix_two is NULL
- * - Returns NULL if memory allocation fails
- * - Returns NULL if string copy fails
+ * - Returns false if either input is NULL
+ * - Returns false if memory reallocation fails
+ * - Returns false if string copy fails
  */
-strix_t *strix_concat(const strix_t *strix_one, const strix_t *strix_two);
-
+bool strix_concat(strix_t *strix_dest, const strix_t *strix_src);
 /**
  * @brief Appends a C-style string to an existing strix_t structure
  *
- * @param strix Target strix_t structure
+ * @param strix Target strix_t structure to modify
  * @param str String to append
- * @return strix_t* Pointer to new strix_t with appended string, or NULL on failure
+ * @return bool true on success, false on failure
  *
  * Edge cases:
- * - Returns NULL if input strix is NULL
- * - Returns NULL if input string is NULL
- * - Returns NULL if creation of temporary strix fails
- * - Returns NULL if concatenation fails
+ * - Returns false if input strix is NULL
+ * - Returns false if input string is NULL
+ * - Returns false if append operation fails
  */
-strix_t *strix_append(strix_t *strix, const char *str);
+bool strix_append(strix_t *strix, const char *str);
 
-/**
- * @brief Frees all memory associated with a strix_t structure
- *
- * Frees both the internal string and the structure itself.
- *
- * @param string strix_t structure to free
- * @return Nothing; Usually doesn't fail
- */
-void *strix_free(strix_t *string);
+void strix_free(strix_t *string);
 
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */
