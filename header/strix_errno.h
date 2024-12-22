@@ -13,12 +13,14 @@
 typedef enum
 {
     STRIX_SUCCESS = 0,        ///< Operation completed successfully
-    STRIX_ERR_NULL_STRIX_PTR, ///< Null pointer passed as argument where non-null required
+    STRIX_ERR_NULL_PTR,       ///< Null pointer passed as argument where non-null required
     STRIX_ERR_MALLOC_FAILED,  ///< Dynamic memory allocation operation failed
     STRIX_ERR_MEMCPY_FAILED,  ///< Memory copy operation failed
     STRIX_ERR_MEMMOVE_FAILED, ///< Memory move operation failed
     STRIX_ERR_INVALID_LENGTH, ///< Invalid string length specified or computed
     STRIX_ERR_EMPTY_STRING,   ///< Empty string provided where non-empty required
+    STRIX_ERR_STRIX_STR_NULL, ///< Null string in the strix structure provided
+    STRIX_ERR_INVALID_POS,    ///< Invalid strix string position provided
 } strix_error_t;
 
 /* _Thread_local has been supported since C11 */
@@ -47,6 +49,8 @@ static const char *strix_error_messages[] = {
     "Memory move operation failed",
     "Invalid string length",
     "Empty string where not allowed",
+    "Null string in the strix structure provided",
+    "Invalid strix string position provided",
 };
 
 /**

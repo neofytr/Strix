@@ -121,6 +121,22 @@ bool strix_concat(strix_t *strix_dest, const strix_t *strix_src);
  */
 bool strix_append(strix_t *strix, const char *str);
 
+/**
+ * @brief Inserts the source strix_t structure's string to the destination strix_t structure's string at position pos
+ *
+ * @param strix_dest Target strix_t structure whose string is being appended to
+ * @param strix_src strix_t structure whose string is being appended
+ * @return bool true on success, false on failure
+ *
+ * Edge cases:
+ * - Returns false if input strixs are NULL
+ * - Returns false if input strix's strings are NULL
+ * - Returns false if the destination strix length is less than or equal to pos
+ */
+bool strix_insert(strix_t *strix_dest, strix_t *strix_src, size_t pos);
+
+bool strix_insert_str(strix_t *strix, size_t pos, const char *substr);
+
 void strix_free(strix_t *string);
 
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

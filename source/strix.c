@@ -8,7 +8,7 @@ static inline bool is_strix_null(const strix_t *strix)
 {
     if (!strix)
     {
-        strix_errno = STRIX_ERR_NULL_STRIX_PTR;
+        strix_errno = STRIX_ERR_NULL_PTR;
         return true;
     }
     return false;
@@ -18,7 +18,7 @@ static inline bool is_str_null(const char *str)
 {
     if (!str)
     {
-        strix_errno = STRIX_ERR_NULL_STRIX_PTR;
+        strix_errno = STRIX_ERR_NULL_PTR;
         return true;
     }
     return false;
@@ -28,7 +28,7 @@ static inline bool is_strix_str_null(const strix_t *strix)
 {
     if (!strix->str)
     {
-        strix_errno = STRIX_ERR_NULL_STRIX_PTR;
+        strix_errno = STRIX_ERR_NULL_PTR;
         return true;
     }
     return false;
@@ -257,6 +257,115 @@ bool strix_append(strix_t *strix, const char *str)
     return true;
 }
 
+bool strix_insert_str(strix_t *strix, size_t pos, const char *substr)
+{
+    if (is_strix_null(strix) || is_str_null(substr))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return false;
+    }
+
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return false;
+    }
+
+    if (strix->len <= pos)
+    {
+        strix_errno = STRIX_ERR_INVALID_POS;
+        return false;
+    }
+
+    char *new_str = (char *)allocate(sizeof(char) * (strlen(substr) + strix->len));
+    if (is_str_null(new_str))
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
+    }
+
+    if (!memcpy((void *)new_str, (void *)strix->str, pos))
+    {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        return false;
+    }
+
+    if (!memcpy(((void *)(uint8_t *)new_str + pos), (void *)substr, strlen(substr)))
+    {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        return false;
+    }
+
+    if (!memcpy(((void *)(uint8_t *)new_str + pos + strlen(substr)), (void *)strix->str, strix->len - pos - 1))
+    {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        return false;
+    }
+
+    deallocate(strix->str);
+    strix->str = new_str;
+    strix->len = strix->len + strlen(substr);
+
+    strix_errno = STRIX_SUCCESS;
+    return true;
+}
+
+bool strix_insert(strix_t *strix_dest, strix_t *strix_src, size_t pos)
+{
+    if (is_strix_null(strix_dest) || is_strix_null(strix_src))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return false;
+    }
+
+    if (is_strix_str_null(strix_dest) || is_strix_str_null(strix_src))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return false;
+    }
+
+    if (strix_dest->len <= pos)
+    {
+        strix_errno = STRIX_ERR_INVALID_POS;
+        return false;
+    }
+
+    char *substr = strix_src->str;
+    size_t len = strix_src->len;
+
+    char *new_str = (char *)allocate(sizeof(char) * (len + strix_dest->len));
+    if (is_str_null(new_str))
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
+    }
+
+    if (!memcpy((void *)new_str, (void *)strix_dest->str, pos))
+    {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        return false;
+    }
+
+    if (!memcpy(((void *)(uint8_t *)new_str + pos), (void *)substr, len))
+    {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        return false;
+    }
+
+    if (!memcpy(((void *)(uint8_t *)new_str + pos + len), (void *)strix_dest->str, strix_dest->len - pos - 1))
+    {
+        strix_errno = STRIX_ERR_MEMMOVE_FAILED;
+        return false;
+    }
+
+    deallocate(strix_dest->str);
+    strix_dest->str = new_str;
+    strix_dest->len = strix_dest->len + len;
+
+    strix_errno = STRIX_SUCCESS;
+    return true;
+}
+
 int main(void)
 {
     strix_t *strix = strix_create("hello");
@@ -292,6 +401,10 @@ int main(void)
         return 1;
     }
 
+    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
+
+    strix_insert_str(strix, 0, "no\n");
+    strix_insert(strix, strix_create("lets go\n"), 0);
     fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
 
     strix_free(strix);
