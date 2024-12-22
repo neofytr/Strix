@@ -86,4 +86,5 @@ void strix_perror(const char *prefix);
  */
 strix_error_t strix_get_error(void);
 
+
 #endif /* AB6C05AF_6E23_4B0A_89C2_DFB861401101 */

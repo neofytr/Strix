@@ -137,6 +137,8 @@ bool strix_insert(strix_t *strix_dest, strix_t *strix_src, size_t pos);
 
 bool strix_insert_str(strix_t *strix, size_t pos, const char *substr);
 
+bool strix_erase(strix_t *strix, size_t len, size_t pos); // delete everything starting from position pos + 1; len is truncated to end of strix string if it exceeds it
+
 void strix_free(strix_t *string);
 
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */
