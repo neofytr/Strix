@@ -120,6 +120,10 @@ if (!strix_some_function(s)) {
 | `STRIX_ERR_MEMCPY_FAILED` | Memory copy operation failed |
 | `STRIX_ERR_INVALID_LENGTH` | Invalid string length |
 | `STRIX_ERR_EMPTY_STRING` | Empty string provided |
+| `STRIX_ERR_STRIX_STR_NULL` | Null string in the strix structure provided |
+| `STRIX_ERR_INVALID_POS` | Invalid strix string position provided |
+| `STRIX_ERR_OUT_OF_BOUNDS_ACCESS` | Out of bounds element access |
+| `STRIX_ERR_INVALID_BOUNDS` | Invalid bounds given for slicing |
 
 ## 📄 License
 
