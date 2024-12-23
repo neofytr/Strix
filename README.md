@@ -1,6 +1,6 @@
 # Strix String Manipulation Library
 
-The **Strix String Manipulation Library** is a C library designed for efficient and flexible string handling. It introduces a `strix_t` structure to manage strings and their lengths explicitly, allowing for seamless manipulation of binary data and avoiding the pitfalls of null-terminated strings. It also includes a custom memory allocator for allocating strix_t structures in memory. Furthermore, support for thread-safe error-handling for strix functions is also provided.
+The **Strix String Manipulation Library** is a C library designed for efficient and flexible string handling. It introduces a `strix_t` structure to manage strings and their lengths explicitly, allowing for seamless manipulation of binary data and avoiding the pitfalls of null-terminated strings. It also includes a custom memory allocator for allocating `strix_t` structures in memory. Furthermore, support for thread-safe error-handling for strix functions is also provided.
 
 ## Data Structures
 
@@ -214,5 +214,9 @@ int main() {
     return 0;
 }
 ```
+
+To use the library, explicitly link with the file `strix.o` located in `/binaries/`:
+
+`gcc main.c strix.o -o main`
 
 
