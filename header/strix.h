@@ -379,4 +379,43 @@ strix_t *strix_join_via_substrix(const strix_t **strix_arr, size_t len, const st
  */
 void strix_free(strix_t *string);
 
+/**
+ * @brief Removes whitespace from both ends of a strix_t in place
+ *
+ * Trims leading and trailing whitespace from the provided strix_t.
+ * The operation modifies the original strix structure directly.
+ *
+ * @param strix Pointer to the strix_t structure to trim
+ * @return bool True on success, false on failure
+ *
+ * Edge cases:
+ * - Returns false if input strix is NULL (sets STRIX_ERR_NULL_PTR)
+ * - Returns false if strix->str is NULL (sets STRIX_ERR_STRIX_STR_NULL)
+ * - Does nothing if the strix is already empty
+ * - Frees the original string if it contains only whitespace
+ * - Returns false if memory allocation fails (sets STRIX_ERR_MALLOC_FAILED)
+ * - Returns false if memcpy fails (sets STRIX_ERR_MEMCPY_FAILED)
+ */
+bool strix_trim_whitespace(strix_t *strix);
+
+/**
+ * @brief Removes a specified character from both ends of a strix_t in place
+ *
+ * Trims leading and trailing occurrences of the specified character from
+ * the provided strix_t. The operation modifies the original strix structure directly.
+ *
+ * @param strix Pointer to the strix_t structure to trim
+ * @param trim Character to remove from both ends
+ * @return bool True on success, false on failure
+ *
+ * Edge cases:
+ * - Returns false if input strix is NULL (sets STRIX_ERR_NULL_PTR)
+ * - Returns false if strix->str is NULL (sets STRIX_ERR_STRIX_STR_NULL)
+ * - Does nothing if the strix is already empty
+ * - Frees the original string if it contains only the trim character
+ * - Returns false if memory allocation fails (sets STRIX_ERR_MALLOC_FAILED)
+ * - Returns false if memcpy fails (sets STRIX_ERR_MEMCPY_FAILED)
+ */
+bool strix_trim_char(strix_t *strix, const char trim);
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

@@ -964,6 +964,8 @@ strix_t *strix_join_via_delim(const strix_t **strix_arr, size_t len, const char 
         }
     }
 
+    strix_errno = STRIX_SUCCESS;
+
     return result;
 }
 
@@ -1023,6 +1025,7 @@ strix_t *strix_join_via_substr(const strix_t **strix_arr, size_t len, const char
             ptr += substr_len;
         }
     }
+    strix_errno = STRIX_SUCCESS;
 
     return result;
 }
@@ -1083,7 +1086,126 @@ strix_t *strix_join_via_substrix(const strix_t **strix_arr, size_t len, const st
         }
     }
 
+    strix_errno = STRIX_SUCCESS;
     return result;
+}
+
+bool strix_trim_whitespace(strix_t *strix)
+{
+    if (is_strix_null(strix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return false;
+    }
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return false;
+    }
+    if (strix->len == 0)
+    {
+        return true; // Already empty, nothing to trim
+    }
+
+    size_t start = 0;
+    while (start < strix->len && isspace((unsigned char)strix->str[start]))
+    {
+        start++;
+    }
+
+    if (start == strix->len)
+    {
+        // Entire string is whitespace
+        deallocate(strix->str);
+        strix->str = NULL;
+        strix->len = 0;
+        return true;
+    }
+
+    size_t end = strix->len - 1;
+    while (end > start && isspace((unsigned char)strix->str[end]))
+    {
+        end--;
+    }
+
+    size_t new_len = end - start + 1;
+    char *new_str = allocate(new_len);
+    if (!new_str)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
+    }
+
+    if (memcpy(new_str, strix->str + start, new_len) == NULL)
+    {
+        deallocate(new_str);
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        return false;
+    }
+
+    deallocate(strix->str);
+    strix->str = new_str;
+    strix->len = new_len;
+    return true;
+}
+
+bool strix_trim_char(strix_t *strix, const char trim)
+{
+    if (is_strix_null(strix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return false;
+    }
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return false;
+    }
+    if (strix->len == 0)
+    {
+        return true; // Already empty, nothing to trim
+    }
+
+    size_t start = 0;
+    while (start < strix->len && strix->str[start] == trim)
+    {
+        start++;
+    }
+
+    if (start == strix->len)
+    {
+        // Entire string is the trim character
+        deallocate(strix->str);
+        strix->str = NULL;
+        strix->len = 0;
+        return true;
+    }
+
+    size_t end = strix->len - 1;
+    while (end > start && strix->str[end] == trim)
+    {
+        end--;
+    }
+
+    size_t new_len = end - start + 1;
+    char *new_str = allocate(new_len);
+    if (!new_str)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
+    }
+
+    if (memcpy(new_str, strix->str + start, new_len) == NULL)
+    {
+        deallocate(new_str);
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        return false;
+    }
+
+    deallocate(strix->str);
+    strix->str = new_str;
+    strix->len = new_len;
+    return true;
 }
 
 int main(void)
