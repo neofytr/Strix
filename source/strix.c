@@ -479,6 +479,7 @@ int64_t strix_find(const strix_t *strix, const char *substr)
         return -1;
     }
 
+    strix_errno = STRIX_SUCCESS;
     return kmp_search(substr, strix->str, strlen(substr), strix->len);
 }
 
@@ -496,6 +497,7 @@ position_t *strix_find_all(const strix_t *strix, const char *substr)
         return NULL;
     }
 
+    strix_errno = STRIX_SUCCESS;
     return kmp_search_all(substr, strix->str, strlen(substr), strix->len);
 }
 
@@ -513,6 +515,7 @@ int64_t strix_find_subtrix(const strix_t *strix_one, const strix_t *strix_two)
         return -1;
     }
 
+    strix_errno = STRIX_SUCCESS;
     return kmp_search(strix_two->str, strix_one->str, strix_two->len, strix_one->len);
 }
 
@@ -530,6 +533,7 @@ position_t *strix_find_subtrix_all(const strix_t *strix_one, const strix_t *stri
         return NULL;
     }
 
+    strix_errno = STRIX_SUCCESS;
     return kmp_search_all(strix_two->str, strix_one->str, strix_two->len, strix_one->len);
 }
 
@@ -537,6 +541,7 @@ void strix_position_free(position_t *position)
 {
     free(position->pos);
     free(position);
+    strix_errno = STRIX_SUCCESS;
 }
 
 void strix_free_strix_arr(strix_arr_t *strix_arr)
@@ -554,7 +559,7 @@ strix_t *strix_slice(const strix_t *strix, size_t start, size_t end)
 {
     if (start > end || end >= strix->len || is_strix_null(strix))
     {
-        strix_errno = start > end || end >= strix->len ? STRIX_ERR_INVALID_LENGTH : STRIX_ERR_NULL_PTR;
+        strix_errno = start > end || end >= strix->len ? STRIX_ERR_INVALID_BOUNDS : STRIX_ERR_NULL_PTR;
         return NULL;
     }
 
@@ -583,6 +588,7 @@ strix_t *strix_slice(const strix_t *strix, size_t start, size_t end)
         return NULL;
     }
 
+    strix_errno = STRIX_SUCCESS;
     return slice;
 }
 
@@ -639,6 +645,267 @@ strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim)
 
     strix_arr_struct->len = len;
     strix_arr_struct->strix_arr = strix_arr;
+    strix_errno = STRIX_SUCCESS;
+    return strix_arr_struct;
+}
+
+strix_arr_t *strix_split_by_substr(const strix_t *strix, const char *substr)
+{
+    if (is_strix_null(strix) || is_str_null(substr))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+    position_t *position = strix_find_all(strix, substr);
+    if (!position)
+    {
+        return NULL;
+    }
+    if (position->len == -1)
+    {
+        deallocate(position);
+        return NULL;
+    }
+
+    strix_arr_t *strix_arr_struct = (strix_arr_t *)allocate(sizeof(strix_arr_t));
+    if (!strix_arr_struct)
+    {
+        deallocate(position);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    if (position->len == -2)
+    {
+        strix_t *copy = strix_duplicate(strix);
+        if (!copy)
+        {
+            deallocate(position);
+            deallocate(strix_arr_struct);
+            return NULL;
+        }
+        strix_arr_struct->len = 1;
+        strix_arr_struct->strix_arr = (strix_t **)allocate(sizeof(strix_t *));
+        if (!strix_arr_struct->strix_arr)
+        {
+            deallocate(position);
+            deallocate(copy);
+            deallocate(strix_arr_struct);
+            strix_errno = STRIX_ERR_MALLOC_FAILED;
+            return NULL;
+        }
+        strix_arr_struct->strix_arr[0] = copy;
+        deallocate(position);
+        return strix_arr_struct;
+    }
+
+    strix_arr_struct->strix_arr = (strix_t **)allocate(sizeof(strix_t *) * MAX_SUBSTRIX_NUM);
+    if (!strix_arr_struct->strix_arr)
+    {
+        deallocate(position);
+        deallocate(strix_arr_struct);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    size_t len = 0;
+    size_t substr_len = strlen(substr);
+
+    if (position->pos[0] > 0)
+    {
+        strix_t *first_part = strix_slice(strix, 0, position->pos[0] - 1);
+        if (!is_strix_null(first_part))
+        {
+            strix_arr_struct->strix_arr[len++] = first_part;
+        }
+    }
+
+    for (size_t counter = 0; counter < position->len; counter++)
+    {
+        strix_t *substrix;
+        size_t start = position->pos[counter] + substr_len;
+
+        if (counter + 1 == position->len)
+        {
+            if (start < strix->len)
+            {
+                substrix = strix_slice(strix, start, strix->len - 1);
+            }
+            else
+            {
+                continue;
+            }
+        }
+        else
+        {
+            if (start < position->pos[counter + 1])
+            {
+                substrix = strix_slice(strix, start, position->pos[counter + 1] - 1);
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        if (is_strix_null(substrix) && strix_errno == STRIX_ERR_INVALID_BOUNDS)
+        {
+            continue;
+        }
+        if (is_strix_null(substrix))
+        {
+            for (size_t i = 0; i < len; i++)
+            {
+                deallocate(strix_arr_struct->strix_arr[i]->str);
+                deallocate(strix_arr_struct->strix_arr[i]);
+            }
+            deallocate(strix_arr_struct->strix_arr);
+            deallocate(strix_arr_struct);
+            deallocate(position);
+            return NULL;
+        }
+        strix_arr_struct->strix_arr[len++] = substrix;
+    }
+
+    strix_arr_struct->len = len;
+    deallocate(position);
+    strix_errno = STRIX_SUCCESS;
+    return strix_arr_struct;
+}
+
+strix_arr_t *strix_split_by_substrix(const strix_t *strix, const strix_t *substrix)
+{
+    if (is_strix_null(strix) || is_strix_null(substrix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+    if (is_strix_str_null(strix) || is_strix_str_null(substrix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+    position_t *position = strix_find_subtrix_all(strix, substrix);
+    if (!position)
+    {
+        return NULL;
+    }
+    if (position->len == -1)
+    {
+        deallocate(position);
+        return NULL;
+    }
+
+    strix_arr_t *strix_arr_struct = (strix_arr_t *)allocate(sizeof(strix_arr_t));
+    if (!strix_arr_struct)
+    {
+        deallocate(position);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    if (position->len == -2)
+    {
+        strix_t *copy = strix_duplicate(strix);
+        if (!copy)
+        {
+            deallocate(position);
+            deallocate(strix_arr_struct);
+            return NULL;
+        }
+        strix_arr_struct->len = 1;
+        strix_arr_struct->strix_arr = (strix_t **)allocate(sizeof(strix_t *));
+        if (!strix_arr_struct->strix_arr)
+        {
+            deallocate(position);
+            deallocate(copy);
+            deallocate(strix_arr_struct);
+            strix_errno = STRIX_ERR_MALLOC_FAILED;
+            return NULL;
+        }
+        strix_arr_struct->strix_arr[0] = copy;
+        deallocate(position);
+        return strix_arr_struct;
+    }
+
+    strix_arr_struct->strix_arr = (strix_t **)allocate(sizeof(strix_t *) * MAX_SUBSTRIX_NUM);
+    if (!strix_arr_struct->strix_arr)
+    {
+        deallocate(position);
+        deallocate(strix_arr_struct);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    size_t len = 0;
+    size_t substr_len = substrix->len;
+
+    if (position->pos[0] > 0)
+    {
+        strix_t *first_part = strix_slice(strix, 0, position->pos[0] - 1);
+        if (!is_strix_null(first_part))
+        {
+            strix_arr_struct->strix_arr[len++] = first_part;
+        }
+    }
+
+    for (size_t counter = 0; counter < position->len; counter++)
+    {
+        strix_t *substrix;
+        size_t start = position->pos[counter] + substr_len;
+
+        if (counter + 1 == position->len)
+        {
+            if (start < strix->len)
+            {
+                substrix = strix_slice(strix, start, strix->len - 1);
+            }
+            else
+            {
+                continue;
+            }
+        }
+        else
+        {
+            if (start < position->pos[counter + 1])
+            {
+                substrix = strix_slice(strix, start, position->pos[counter + 1] - 1);
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        if (is_strix_null(substrix) && strix_errno == STRIX_ERR_INVALID_BOUNDS)
+        {
+            continue;
+        }
+        if (is_strix_null(substrix))
+        {
+            for (size_t i = 0; i < len; i++)
+            {
+                deallocate(strix_arr_struct->strix_arr[i]->str);
+                deallocate(strix_arr_struct->strix_arr[i]);
+            }
+            deallocate(strix_arr_struct->strix_arr);
+            deallocate(strix_arr_struct);
+            deallocate(position);
+            return NULL;
+        }
+        strix_arr_struct->strix_arr[len++] = substrix;
+    }
+
+    strix_arr_struct->len = len;
+    deallocate(position);
+    strix_errno = STRIX_SUCCESS;
     return strix_arr_struct;
 }
 
@@ -689,8 +956,8 @@ int main(void)
     fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
     fprintf(stdout, "%d\n", strix_equal(strix_create("hello"), strix_create("hello\n")));
 
-    strix_t *new = strix_create("\n\n\n\nhelloworldkaise\nho\nsab\n\n\n");
-    strix_arr_t *arr = strix_split_by_delim(new, '\n');
+    strix_t *new = strix_create("\nhelloworldkaise\nho\nsab\n");
+    strix_arr_t *arr = strix_split_by_substrix(new, strix_create("\n"));
     fprintf(stdout, "%p\n", arr);
 
     for (size_t counter = 0; counter < arr->len; counter++)

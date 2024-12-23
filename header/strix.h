@@ -166,6 +166,10 @@ strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim);
 
 void strix_free_strix_arr(strix_arr_t *strix_arr);
 
+strix_arr_t *strix_split_by_substr(const strix_t *strix, const char *substr);
+
+strix_arr_t *strix_split_by_substrix(const strix_t *strix, const strix_t *substrix);
+
 strix_t *strix_slice(const strix_t *strix, size_t start, size_t end);
 
 void strix_free(strix_t *string);

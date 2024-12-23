@@ -42,7 +42,7 @@ int64_t kmp_search(const char *pattern, const char *string, size_t pattern_len, 
             if (j == pattern_len)
             {
                 j = lps[j - 1]; // the search can be continued using this, but i return after finding the first match
-                return (i - j);
+                return (i - j - 1);
             }
         }
         else
@@ -118,7 +118,7 @@ position_t *kmp_search_all(const char *pattern, const char *string, size_t patte
             if (j == pattern_len)
             {
                 j = lps[j - 1]; // the search can be continued using this, but i return after finding the first match
-                pos_arr[counter++] = i - j;
+                pos_arr[counter++] = i - j - 1;
             }
         }
         else
