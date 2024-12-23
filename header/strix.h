@@ -8,6 +8,8 @@
 #include "string_search.h"
 #include "../allocator/allocator.h"
 
+
+
 /**
  * @brief String handling structure that stores both the string and its length
  *
@@ -19,6 +21,14 @@ typedef struct
     char *str;  // Pointer to the string data
     size_t len; // Length of the string
 } strix_t;
+
+typedef struct
+{
+    strix_t **strix_arr;
+    size_t len;
+} strix_arr_t;
+
+#define MAX_SUBSTRIX_NUM 2048
 
 /**
  * @brief Format macro for printf-style functions
@@ -136,42 +146,239 @@ bool strix_append(strix_t *strix, const char *str);
  */
 bool strix_insert(strix_t *strix_dest, strix_t *strix_src, size_t pos);
 
+/**
+ * @brief Appends a substring at a specified position in a strix_t structure
+ *
+ * @param strix Target strix_t structure to modify
+ * @param pos Position at which to insert the substring
+ * @param substr String to insert
+ * @return bool true on success, false on failure
+ *
+ * Edge cases:
+ * - Returns false if input strix is NULL
+ * - Returns false if input substring is NULL
+ * - Returns false if pos is greater than strix length
+ * - Returns false if memory reallocation fails
+ */
 bool strix_insert_str(strix_t *strix, size_t pos, const char *substr);
 
-bool strix_erase(strix_t *strix, size_t len, size_t pos); // delete everything starting from position pos + 1; len is truncated to end of strix string if it exceeds it
+/**
+ * @brief Erases a portion of the string starting from a specified position
+ *
+ * @param strix Target strix_t structure to modify
+ * @param len Number of characters to erase
+ * @param pos Starting position for erasure
+ * @return bool true on success, false on failure
+ *
+ * Edge cases:
+ * - Returns false if input strix is NULL
+ * - Returns false if pos is greater than string length
+ * - If len exceeds remaining string length, truncates to end of string
+ */
+bool strix_erase(strix_t *strix, size_t len, size_t pos);
 
+/**
+ * @brief Retrieves character at specified index in strix_t structure
+ *
+ * @param strix Source strix_t structure
+ * @param index Position of character to retrieve
+ * @return char Character at specified index, '\0' on error
+ *
+ * Edge cases:
+ * - Returns '\0' if input strix is NULL
+ * - Returns '\0' if index is out of bounds
+ */
 char strix_at(const strix_t *strix, size_t index);
 
-int strix_equal(const strix_t *strix_one, const strix_t *strix_two); // -1 on error, 0 if equal, 1 if unequal
+/**
+ * @brief Compares two strix_t structures for equality
+ *
+ * @param strix_one First strix_t structure to compare
+ * @param strix_two Second strix_t structure to compare
+ * @return int -1 on error, 0 if equal, 1 if unequal
+ *
+ * Edge cases:
+ * - Returns -1 if either input is NULL
+ * - Returns 1 if lengths differ
+ */
+int strix_equal(const strix_t *strix_one, const strix_t *strix_two);
 
-int64_t strix_find(const strix_t *strix, const char *substr); // index of first detection in the string; -1 on error; -2 on not found
+/**
+ * @brief Finds first occurrence of substring in strix_t structure
+ *
+ * @param strix Source strix_t structure to search in
+ * @param substr Substring to search for
+ * @return int64_t Index of first match, -1 on error, -2 if not found
+ *
+ * Edge cases:
+ * - Returns -1 if either input is NULL
+ * - Returns -2 if substring not found
+ */
+int64_t strix_find(const strix_t *strix, const char *substr);
 
-position_t *strix_find_all(const strix_t *strix, const char *substr); // NULL on error, len is -2 on not found; if positive, contains all the positions in pos;
+/**
+ * @brief Finds all occurrences of substring in strix_t structure
+ *
+ * @param strix Source strix_t structure to search in
+ * @param substr Substring to search for
+ * @return position_t* Structure containing all match positions, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if either input is NULL
+ * - Returns position_t with len = -2 if substring not found
+ * - Returns NULL if memory allocation fails
+ */
+position_t *strix_find_all(const strix_t *strix, const char *substr);
 
+/**
+ * @brief Frees memory allocated for position_t structure
+ *
+ * @param position Position structure to free
+ */
 void strix_position_free(position_t *position);
 
+/**
+ * @brief Finds first occurrence of one strix_t within another
+ *
+ * @param strix_one Source strix_t structure to search in
+ * @param strix_two Strix_t structure to search for
+ * @return int64_t Index of first match, -1 on error, -2 if not found
+ *
+ * Edge cases:
+ * - Returns -1 if either input is NULL
+ * - Returns -2 if substring not found
+ */
 int64_t strix_find_subtrix(const strix_t *strix_one, const strix_t *strix_two);
 
+/**
+ * @brief Finds all occurrences of one strix_t within another
+ *
+ * @param strix_one Source strix_t structure to search in
+ * @param strix_two Strix_t structure to search for
+ * @return position_t* Structure containing all match positions, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if either input is NULL
+ * - Returns position_t with len = -2 if not found
+ * - Returns NULL if memory allocation fails
+ */
 position_t *strix_find_subtrix_all(const strix_t *strix_one, const strix_t *strix_two);
 
-#define MAX_SUBSTRIX_NUM 2048
-
-typedef struct
-{
-    strix_t **strix_arr;
-    size_t len;
-} strix_arr_t;
-
+/**
+ * @brief Splits a strix_t into array of strix_t structures by delimiter
+ *
+ * @param strix Source strix_t structure to split
+ * @param delim Delimiter character
+ * @return strix_arr_t* Array of resulting strix_t structures, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if input strix is NULL
+ * - Returns NULL if memory allocation fails
+ * - Limited to MAX_SUBSTRIX_NUM (2048) splits
+ */
 strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim);
 
+/**
+ * @brief Frees memory allocated for strix_arr_t structure
+ *
+ * @param strix_arr Array structure to free
+ */
 void strix_free_strix_arr(strix_arr_t *strix_arr);
 
+/**
+ * @brief Splits a strix_t into array of strix_t structures by substring
+ *
+ * @param strix Source strix_t structure to split
+ * @param substr Substring to split on
+ * @return strix_arr_t* Array of resulting strix_t structures, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if either input is NULL
+ * - Returns NULL if memory allocation fails
+ * - Limited to MAX_SUBSTRIX_NUM (2048) splits
+ */
 strix_arr_t *strix_split_by_substr(const strix_t *strix, const char *substr);
 
+/**
+ * @brief Splits a strix_t into array of strix_t structures by another strix_t
+ *
+ * @param strix Source strix_t structure to split
+ * @param substrix Strix_t structure to split on
+ * @return strix_arr_t* Array of resulting strix_t structures, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if either input is NULL
+ * - Returns NULL if memory allocation fails
+ * - Limited to MAX_SUBSTRIX_NUM (2048) splits
+ */
 strix_arr_t *strix_split_by_substrix(const strix_t *strix, const strix_t *substrix);
 
+/**
+ * @brief Creates a new strix_t containing a subset of another strix_t
+ *
+ * @param strix Source strix_t structure
+ * @param start Starting index of slice
+ * @param end Ending index of slice (exclusive)
+ * @return strix_t* New strix_t containing the slice, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if input strix is NULL
+ * - Returns NULL if start is greater than end
+ * - Returns NULL if end is greater than strix length
+ * - Returns NULL if memory allocation fails
+ */
 strix_t *strix_slice(const strix_t *strix, size_t start, size_t end);
 
+/**
+ * @brief Joins an array of strix_t structures using a delimiter
+ *
+ * @param strix_arr Array of strix_t structures to join
+ * @param len Length of array
+ * @param delim Delimiter character
+ * @return strix_t* New strix_t containing joined string, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if input array is NULL
+ * - Returns NULL if len is 0
+ * - Returns NULL if memory allocation fails
+ */
+strix_t *strix_join_via_delim(const strix_t **strix_arr, size_t len, const char delim);
+
+/**
+ * @brief Joins an array of strix_t structures using a substring
+ *
+ * @param strix_arr Array of strix_t structures to join
+ * @param len Length of array
+ * @param substr Substring to use as separator
+ * @return strix_t* New strix_t containing joined string, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if input array or substr is NULL
+ * - Returns NULL if len is 0
+ * - Returns NULL if memory allocation fails
+ */
+strix_t *strix_join_via_substr(const strix_t **strix_arr, size_t len, const char *substr);
+
+/**
+ * @brief Joins an array of strix_t structures using another strix_t
+ *
+ * @param strix_arr Array of strix_t structures to join
+ * @param len Length of array
+ * @param substrix Strix_t structure to use as separator
+ * @return strix_t* New strix_t containing joined string, NULL on error
+ *
+ * Edge cases:
+ * - Returns NULL if input array or substrix is NULL
+ * - Returns NULL if len is 0
+ * - Returns NULL if memory allocation fails
+ */
+strix_t *strix_join_via_substrix(const strix_t **strix_arr, size_t len, const strix_t *substrix);
+
+/**
+ * @brief Frees memory allocated for strix_t structure
+ *
+ * @param string Strix_t structure to free
+ */
 void strix_free(strix_t *string);
 
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

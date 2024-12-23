@@ -912,6 +912,180 @@ strix_arr_t *strix_split_by_substrix(const strix_t *strix, const strix_t *substr
 #undef MAX_SUBSTRIX_NUM
 #undef MAX_POSITIONS
 
+strix_t *strix_join_via_delim(const strix_t **strix_arr, size_t len, const char delim)
+{
+    if (!strix_arr || !len)
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    size_t total_len = 0;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (is_strix_null(strix_arr[i]))
+        {
+            strix_errno = STRIX_ERR_NULL_PTR;
+            return NULL;
+        }
+        total_len += strix_arr[i]->len;
+    }
+    total_len += len - 1; // add space for delimiters
+
+    strix_t *result = (strix_t *)allocate(sizeof(strix_t));
+    if (!result)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    result->str = (char *)allocate(sizeof(char) * total_len);
+    if (!result->str)
+    {
+        deallocate(result);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+    result->len = total_len;
+
+    char *ptr = result->str;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (!memcpy(ptr, strix_arr[i]->str, strix_arr[i]->len))
+        {
+            strix_errno = STRIX_ERR_MEMCPY_FAILED;
+            return NULL;
+        }
+        ptr += strix_arr[i]->len;
+        if (i < len - 1)
+        {
+            *ptr = delim;
+            ptr++;
+        }
+    }
+
+    return result;
+}
+
+strix_t *strix_join_via_substr(const strix_t **strix_arr, size_t len, const char *substr)
+{
+    if (!strix_arr || !len || !substr)
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    size_t substr_len = strlen(substr);
+    size_t total_len = 0;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (is_strix_null(strix_arr[i]))
+        {
+            strix_errno = STRIX_ERR_NULL_PTR;
+            return NULL;
+        }
+        total_len += strix_arr[i]->len;
+    }
+    total_len += (len - 1) * substr_len;
+
+    strix_t *result = (strix_t *)allocate(sizeof(strix_t));
+    if (!result)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    result->str = (char *)allocate(sizeof(char) * total_len);
+    if (!result->str)
+    {
+        deallocate(result);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+    result->len = total_len;
+
+    char *ptr = result->str;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (!memcpy(ptr, strix_arr[i]->str, strix_arr[i]->len))
+        {
+            strix_errno = STRIX_ERR_MEMCPY_FAILED;
+            return NULL;
+        }
+        ptr += strix_arr[i]->len;
+        if (i < len - 1)
+        {
+            if (!memcpy(ptr, substr, substr_len))
+            {
+                strix_errno = STRIX_ERR_MEMCPY_FAILED;
+                return NULL;
+            }
+            ptr += substr_len;
+        }
+    }
+
+    return result;
+}
+
+strix_t *strix_join_via_substrix(const strix_t **strix_arr, size_t len, const strix_t *substrix)
+{
+    if (!strix_arr || !len || is_strix_null(substrix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    size_t total_len = 0;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (is_strix_null(strix_arr[i]))
+        {
+            strix_errno = STRIX_ERR_NULL_PTR;
+            return NULL;
+        }
+        total_len += strix_arr[i]->len;
+    }
+    total_len += (len - 1) * substrix->len;
+
+    strix_t *result = (strix_t *)allocate(sizeof(strix_t));
+    if (!result)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    result->str = (char *)allocate(sizeof(char) * total_len);
+    if (!result->str)
+    {
+        deallocate(result);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+    result->len = total_len;
+
+    char *ptr = result->str;
+    for (size_t i = 0; i < len; i++)
+    {
+        if (!memcpy(ptr, strix_arr[i]->str, strix_arr[i]->len))
+        {
+            strix_errno = STRIX_ERR_MEMCPY_FAILED;
+            return NULL;
+        }
+        ptr += strix_arr[i]->len;
+        if (i < len - 1)
+        {
+            if (!memcpy(ptr, substrix->str, substrix->len))
+            {
+                strix_errno = STRIX_ERR_MEMCPY_FAILED;
+                return NULL;
+            }
+            ptr += substrix->len;
+        }
+    }
+
+    return result;
+}
+
 int main(void)
 {
     strix_t *strix = strix_create("hello");
