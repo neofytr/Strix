@@ -1104,7 +1104,7 @@ bool strix_trim_whitespace(strix_t *strix)
     }
     if (strix->len == 0)
     {
-        return true; // Already empty, nothing to trim
+        return true;
     }
 
     size_t start = 0;
@@ -1115,7 +1115,6 @@ bool strix_trim_whitespace(strix_t *strix)
 
     if (start == strix->len)
     {
-        // Entire string is whitespace
         deallocate(strix->str);
         strix->str = NULL;
         strix->len = 0;
@@ -1163,7 +1162,7 @@ bool strix_trim_char(strix_t *strix, const char trim)
     }
     if (strix->len == 0)
     {
-        return true; // Already empty, nothing to trim
+        return true; 
     }
 
     size_t start = 0;
@@ -1174,7 +1173,6 @@ bool strix_trim_char(strix_t *strix, const char trim)
 
     if (start == strix->len)
     {
-        // Entire string is the trim character
         deallocate(strix->str);
         strix->str = NULL;
         strix->len = 0;
