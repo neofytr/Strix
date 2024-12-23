@@ -1162,7 +1162,7 @@ bool strix_trim_char(strix_t *strix, const char trim)
     }
     if (strix->len == 0)
     {
-        return true; 
+        return true;
     }
 
     size_t start = 0;
@@ -1206,60 +1206,157 @@ bool strix_trim_char(strix_t *strix, const char trim)
     return true;
 }
 
-int main(void)
+double strix_to_double(strix_t *strix)
 {
-    strix_t *strix = strix_create("hello");
-    if (!strix)
+    double num = 0;
+    double fraction_part = 0;
+    bool is_neg = false;
+    bool in_fraction = false;
+    double divisor = 1;
+    strix_errno = STRIX_SUCCESS;
+
+    for (size_t i = 0; i < strix->len; i++)
     {
-        strix_perror("Failed to create first string");
-        return 1;
+        char ch = strix->str[i];
+
+        if (ch == '-')
+        {
+            if (i > 0)
+            {
+                strix_errno = STRIX_ERR_INVALID_DOUBLE;
+                return -1;
+            }
+            is_neg = true;
+            continue;
+        }
+
+        if (ch == '+')
+        {
+            if (i > 0)
+            {
+                strix_errno = STRIX_ERR_INVALID_DOUBLE;
+                return -1;
+            }
+            continue;
+        }
+
+        if (ch == '.')
+        {
+            if (in_fraction)
+            {
+                strix_errno = STRIX_ERR_INVALID_DOUBLE;
+                return -1;
+            }
+            in_fraction = true;
+            continue;
+        }
+
+        int dig = ch - '0';
+        if (dig < 0 || dig > 9)
+        {
+            strix_errno = STRIX_ERR_INVALID_DOUBLE;
+            return -1;
+        }
+
+        if (in_fraction)
+        {
+            divisor *= 10;
+            fraction_part += dig / divisor;
+        }
+        else
+        {
+            num = num * 10 + dig;
+        }
     }
 
-    strix_t *world = strix_create(", world!");
-    if (!world)
+    double result = num + fraction_part;
+    return is_neg ? -result : result;
+}
+
+uint64_t strix_to_unsigned_int(strix_t *strix)
+{
+    strix_errno = STRIX_SUCCESS;
+    uint64_t num = 0;
+
+    for (size_t i = 0; i < strix->len; i++)
     {
-        strix_perror("Failed to create second string");
-        strix_free(strix);
-        return 1;
+        char ch = strix->str[i];
+
+        if (ch == '+')
+        {
+            if (i > 0)
+            {
+                strix_errno = STRIX_ERR_INVALID_INT;
+                return 0;
+            }
+            continue;
+        }
+
+        int dig = ch - '0';
+        if (dig < 0 || dig > 9)
+        {
+            strix_errno = STRIX_ERR_INVALID_INT;
+            return 0;
+        }
+
+        if (num > (UINT64_MAX - dig) / 10)
+        {
+            strix_errno = STRIX_ERR_INT_OVERFLOW;
+            return 0;
+        }
+
+        num = num * 10 + dig;
     }
 
-    if (!strix_concat(strix, world))
+    return num;
+}
+
+int64_t strix_to_signed_int(strix_t *strix)
+{
+    strix_errno = STRIX_SUCCESS;
+    bool is_neg = false;
+    int64_t num = 0;
+
+    for (size_t i = 0; i < strix->len; i++)
     {
-        strix_perror("Failed to concatenate strings");
-        strix_free(strix);
-        strix_free(world);
-        return 1;
+        char ch = strix->str[i];
+
+        if (ch == '+')
+        {
+            if (i > 0)
+            {
+                strix_errno = STRIX_ERR_INVALID_INT;
+                return 0;
+            }
+            continue;
+        }
+
+        if (ch == '-')
+        {
+            if (i > 0)
+            {
+                strix_errno = STRIX_ERR_INVALID_INT;
+                return 0;
+            }
+            is_neg = true;
+            continue;
+        }
+
+        int dig = ch - '0';
+        if (dig < 0 || dig > 9)
+        {
+            strix_errno = STRIX_ERR_INVALID_INT;
+            return 0;
+        }
+
+        if (num > (INT64_MAX - dig) / 10)
+        {
+            strix_errno = STRIX_ERR_INT_OVERFLOW;
+            return 0;
+        }
+
+        num = num * 10 + dig;
     }
 
-    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
-
-    if (!strix_append(strix, "!!"))
-    {
-        strix_perror("Failed to append string");
-        strix_free(strix);
-        strix_free(world);
-        return 1;
-    }
-
-    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
-
-    strix_insert_str(strix, 0, "no\n");
-    strix_insert(strix, strix_create("lets go\n"), 0);
-    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
-    strix_erase(strix, 100, 3);
-    fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
-    fprintf(stdout, "%d\n", strix_equal(strix_create("hello"), strix_create("hello\n")));
-
-    strix_t *new = strix_create("\nhelloworldkaise\nho\nsab\n");
-    strix_arr_t *arr = strix_split_by_substrix(new, strix_create("\n"));
-    fprintf(stdout, "%p\n", arr);
-
-    for (size_t counter = 0; counter < arr->len; counter++)
-    {
-        fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(arr->strix_arr[counter]));
-    }
-
-    strix_free(strix);
-    strix_free(world);
-    return 0;
+    return is_neg ? -num : num;
 }

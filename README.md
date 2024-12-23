@@ -102,6 +102,16 @@ For detailed API reference, consult the file: `/header/strix.h`
 | `strix_trim_whitespace` | Removes whitespace from both ends of a strix_t in place | `bool strix_trim_whitespace(strix_t *strix)`|
 | `strix_trim_char` | Removes a specified character from both ends of a strix_t in place | `bool strix_trim_char(strix_t *strix, const char trim)` |
 
+Here’s the table format for the conversion functions you requested:
+
+### Conversion Operations
+
+| Function                    | Description                                                                          | Signature                                              |
+|-----------------------------|--------------------------------------------------------------------------------------|--------------------------------------------------------|
+| `strix_to_double`            | Converts a strix_t to a double value. Handles signs, decimals, and errors.          | `double strix_to_double(strix_t *strix)`               |
+| `strix_to_signed_int`        | Converts a strix_t to a signed 64-bit integer. Handles signs and overflow checks.    | `int64_t strix_to_signed_int(strix_t *strix)`          |
+| `strix_to_unsigned_int`      | Converts a strix_t to an unsigned 64-bit integer. Handles positive sign and overflow checks. | `uint64_t strix_to_unsigned_int(strix_t *strix)`      |
+
 ## 🎯 Usage Example
 
 ```c

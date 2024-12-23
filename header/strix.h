@@ -418,4 +418,55 @@ bool strix_trim_whitespace(strix_t *strix);
  */
 bool strix_trim_char(strix_t *strix, const char trim);
 
+/**
+ * @brief Converts a strix_t to a double value
+ *
+ * This function converts the string in the provided strix_t structure to a double value.
+ * The function handles optional signs ('+' and '-') and a decimal point for fractional numbers.
+ * It stores the result in a double and returns it.
+ *
+ * @param strix Pointer to the strix_t structure to convert
+ * @return double The converted double value, or -1 if there is an error (error detected through strix_errno)
+ *
+ * Errors:
+ * - Sets strix_errno to STRIX_ERR_INVALID_DOUBLE if the string is not a valid number
+ * - Returns -1 if an invalid character, multiple decimal points, or improper sign usage is detected
+ * - strix_errno must be checked for detailed error information
+ */
+double strix_to_double(strix_t *strix);
+
+/**
+ * @brief Converts a strix_t to a signed integer
+ *
+ * This function converts the string in the provided strix_t structure to a signed 64-bit integer.
+ * The function handles optional signs ('+' and '-') and performs overflow checks before conversion.
+ * It returns the converted integer if successful or 0 in case of failure.
+ *
+ * @param strix Pointer to the strix_t structure to convert
+ * @return int64_t The converted signed integer, or 0 if there is an error (error detected through strix_errno)
+ *
+ * Errors:
+ * - Sets strix_errno to STRIX_ERR_INVALID_DOUBLE if the string is not a valid signed integer
+ * - Returns 0 if the string contains invalid characters, or the integer overflows
+ * - strix_errno must be checked for detailed error information
+ */
+int64_t strix_to_signed_int(strix_t *strix);
+
+/**
+ * @brief Converts a strix_t to an unsigned integer
+ *
+ * This function converts the string in the provided strix_t structure to an unsigned 64-bit integer.
+ * It handles an optional positive sign ('+'), and performs overflow checks before conversion.
+ * It returns the converted integer if successful or 0 in case of failure.
+ *
+ * @param strix Pointer to the strix_t structure to convert
+ * @return uint64_t The converted unsigned integer, or 0 if there is an error (error detected through strix_errno)
+ *
+ * Errors:
+ * - Sets strix_errno to STRIX_ERR_INVALID_DOUBLE if the string is not a valid unsigned integer
+ * - Returns 0 if the string contains invalid characters, or the integer overflows
+ * - strix_errno must be checked for detailed error information
+ */
+uint64_t strix_to_unsigned_int(strix_t *strix);
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */
