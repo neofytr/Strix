@@ -95,6 +95,13 @@ For detailed API reference, consult the file: `/header/strix.h`
 | `strix_join_via_delim` | Joins with delimiter | `strix_t *strix_join_via_delim(const strix_t **strix_arr, size_t len, const char delim)` |
 | `strix_join_via_substr` | Joins with substring | `strix_t *strix_join_via_substr(const strix_t **strix_arr, size_t len, const char *substr)` |
 
+### Trim Operations
+
+| Function | Description | Signature |
+|----------|-------------|-----------|
+| `strix_trim_whitespace` | Removes whitespace from both ends of a strix_t in place | `bool strix_trim_whitespace(strix_t *strix)`|
+| `strix_trim_char` | Removes a specified character from both ends of a strix_t in place | `bool strix_trim_char(strix_t *strix, const char trim)` |
+
 ## 🎯 Usage Example
 
 ```c
