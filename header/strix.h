@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "../allocator/allocator.h"
+#include "string_search.h"
 
 /**
  * @brief String handling structure that stores both the string and its length
@@ -144,6 +145,14 @@ char strix_at(const strix_t *strix, size_t index);
 int strix_equal(const strix_t *strix_one, const strix_t *strix_two); // -1 on error, 0 if equal, 1 if unequal
 
 int64_t strix_find(const strix_t *strix, const char *substr); // index of first detection in the string; -1 on error; -2 on not found
+
+position_t *strix_find_all(const strix_t *strix, const char *substr); // NULL on error, len is -2 on not found; if positive, contains all the positions in pos;
+
+void strix_position_free(position_t *position);
+
+int64_t strix_find_subtrix(const strix_t *strix_one, const strix_t *strix_two);
+
+position_t *strix_find_subtrix_all(const strix_t *strix_one, const strix_t *strix_two);
 
 void strix_free(strix_t *string);
 

@@ -484,6 +484,63 @@ int64_t strix_find(const strix_t *strix, const char *substr)
     return kmp_search(substr, strix->str, strlen(substr), strix->len);
 }
 
+position_t *strix_find_all(const strix_t *strix, const char *substr)
+{
+    if (is_strix_null(strix) || is_str_null(substr))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+    return kmp_search_all(substr, strix->str, strlen(substr), strix->len);
+}
+
+int64_t strix_find_subtrix(const strix_t *strix_one, const strix_t *strix_two)
+{
+    if (is_strix_null(strix_one) || is_strix_null(strix_two))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return -1;
+    }
+
+    if (is_strix_str_null(strix_one) || is_strix_str_null(strix_two))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return -1;
+    }
+
+    return kmp_search(strix_two->str, strix_one->str, strix_two->len, strix_one->len);
+}
+
+position_t *strix_find_subtrix_all(const strix_t *strix_one, const strix_t *strix_two)
+{
+    if (is_strix_null(strix_one) || is_strix_null(strix_two))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    if (is_strix_str_null(strix_one) || is_strix_str_null(strix_two))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+    return kmp_search_all(strix_two->str, strix_one->str, strix_two->len, strix_one->len);
+}
+
+void strix_position_free(position_t *position)
+{
+    deallocate(position->pos);
+    deallocate(position);
+}
+
 int main(void)
 {
     strix_t *strix = strix_create("hello");
