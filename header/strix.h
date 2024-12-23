@@ -143,6 +143,8 @@ char strix_at(const strix_t *strix, size_t index);
 
 int strix_equal(const strix_t *strix_one, const strix_t *strix_two); // -1 on error, 0 if equal, 1 if unequal
 
+int64_t strix_find(const strix_t *strix, const char *substr); // index of first detection in the string; -1 on error; -2 on not found
+
 void strix_free(strix_t *string);
 
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

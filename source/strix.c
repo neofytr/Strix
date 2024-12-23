@@ -3,6 +3,7 @@
 
 #include "../header/strix.h"
 #include "../header/strix_errno.h"
+#include "../header/string_search.h"
 
 static inline bool is_strix_null(const strix_t *strix)
 {
@@ -480,7 +481,7 @@ int64_t strix_find(const strix_t *strix, const char *substr)
         return -1;
     }
 
-    
+    return kmp_search(substr, strix->str, strlen(substr), strix->len);
 }
 
 int main(void)
