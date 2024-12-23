@@ -8,8 +8,6 @@
 #include "string_search.h"
 #include "../allocator/allocator.h"
 
-
-
 /**
  * @brief String handling structure that stores both the string and its length
  *
