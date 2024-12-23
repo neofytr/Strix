@@ -93,15 +93,13 @@ void heap_free(void *ptr);
 void heap_init();
 void *heap_realloc(void *ptr, size_t new_size, alignment_t new_alignment);
 
-#define MEM_IMPLEMENTATION
-
 #ifdef MEM_IMPLEMENTATION
 
 static void init_bins();
-static ssize_t search_by_ptr(void *ptr, metadata_t *array, size_t array_size);
-static ssize_t search_by_ptr_in_free_array(void *ptr);
-static ssize_t search_by_ptr_in_alloc_array(void *ptr);
-static ssize_t search_by_size_in_free_array(size_t size, alignment_t alignment);
+static int64_t search_by_ptr(void *ptr, metadata_t *array, size_t array_size);
+static int64_t search_by_ptr_in_free_array(void *ptr);
+static int64_t search_by_ptr_in_alloc_array(void *ptr);
+static int64_t search_by_size_in_free_array(size_t size, alignment_t alignment);
 static inline alignment_t calculate_alignment(const void *ptr);
 static bool remove_from_array(size_t index, metadata_t *array, size_t *array_size);
 static bool remove_from_free_array(size_t index);
@@ -142,7 +140,7 @@ static bool is_valid_heap_ptr(void *ptr)
 
 static bool is_marked_allocation(void *ptr)
 {
-    ssize_t heap_index = search_by_ptr_in_alloc_array(ptr);
+    int64_t heap_index = search_by_ptr_in_alloc_array(ptr);
     if (heap_index != -1)
     {
         return alloc_array[heap_index].mark;
@@ -174,7 +172,7 @@ static void mark_object(void *ptr)
         return;
     }
 
-    ssize_t heap_index = search_by_ptr_in_alloc_array(ptr);
+    int64_t heap_index = search_by_ptr_in_alloc_array(ptr);
     metadata_t *metadata = NULL;
 
     if (heap_index != -1)
@@ -333,9 +331,9 @@ void gc_collect()
     collecting = false;
 }
 
-#endif
+#endif // GC_COLLECT
 
-static ssize_t search_by_ptr(void *ptr, metadata_t *array, size_t array_size)
+static int64_t search_by_ptr(void *ptr, metadata_t *array, size_t array_size)
 {
     size_t left = 0;
     size_t right = array_size;
@@ -359,21 +357,21 @@ static ssize_t search_by_ptr(void *ptr, metadata_t *array, size_t array_size)
     return -1;
 }
 
-static ssize_t search_by_ptr_in_free_array(void *ptr)
+static int64_t search_by_ptr_in_free_array(void *ptr)
 {
     return search_by_ptr(ptr, free_array, free_array_size);
 }
 
-static ssize_t search_by_ptr_in_alloc_array(void *ptr)
+static int64_t search_by_ptr_in_alloc_array(void *ptr)
 {
     return search_by_ptr(ptr, alloc_array, alloc_array_size);
 }
 
-static ssize_t search_by_size_in_free_array(size_t size, alignment_t alignment)
+static int64_t search_by_size_in_free_array(size_t size, alignment_t alignment)
 {
     size_t left = 0;
     size_t right = free_array_size;
-    ssize_t best_fit = -1;
+    int64_t best_fit = -1;
     size_t smallest_sufficient_size = SIZE_MAX;
 
     while (left < right)
@@ -526,7 +524,7 @@ static void defragment_heap()
                 }
             }
 
-            ssize_t prev_idx = search_by_ptr_in_free_array(current->prev_chunk_ptr);
+            int64_t prev_idx = search_by_ptr_in_free_array(current->prev_chunk_ptr);
             if (prev_idx >= 0)
             {
                 metadata_t *prev = &free_array[prev_idx];
@@ -610,7 +608,7 @@ void *heap_alloc(size_t size, alignment_t alignment)
     }
     else
     {
-        ssize_t best_fit_index = search_by_size_in_free_array(size, alignment);
+        int64_t best_fit_index = search_by_size_in_free_array(size, alignment);
         if (best_fit_index < 0)
         {
             return NULL;
@@ -781,7 +779,7 @@ void heap_free(void *ptr)
     size_t *source_alloc_size = NULL;
     size_t *target_free_size = NULL;
     size_t target_capacity = 0;
-    ssize_t alloc_index = -1;
+    int64_t alloc_index = -1;
 
     uintptr_t heap_start = (uintptr_t)heap;
     uintptr_t heap_end = heap_start + HEAP_CAPACITY;
@@ -885,7 +883,7 @@ void *heap_realloc(void *ptr, size_t new_size, alignment_t new_alignment)
         new_alignment = DEFAULT_ALIGNMENT;
     }
 
-    ssize_t ptr_index = search_by_ptr_in_alloc_array(ptr);
+    int64_t ptr_index = search_by_ptr_in_alloc_array(ptr);
     if (ptr_index < 0)
     {
         return NULL;

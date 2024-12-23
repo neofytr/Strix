@@ -22,6 +22,7 @@ typedef enum
     STRIX_ERR_STRIX_STR_NULL,       ///< Null string in the strix structure provided
     STRIX_ERR_INVALID_POS,          ///< Invalid strix string position provided
     STRIX_ERR_OUT_OF_BOUNDS_ACCESS, ///< Out of bounds element access
+    STRIX_ERR_INVALID_BOUNDS,       ///< Invalid bounds given for slicing
 } strix_error_t;
 
 /* _Thread_local has been supported since C11 */
@@ -53,6 +54,7 @@ static const char *strix_error_messages[] = {
     "Null string in the strix structure provided",
     "Invalid strix string position provided",
     "Out of bounds element access",
+    "Invalid bounds given for slicing",
 };
 
 /**

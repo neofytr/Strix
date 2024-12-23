@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "strix_errno.h"
+
 #define MAX_POSITIONS 1024
 typedef struct
 {

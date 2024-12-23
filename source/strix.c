@@ -2,8 +2,6 @@
 #include <stdint.h>
 
 #include "../header/strix.h"
-#include "../header/strix_errno.h"
-#include "../header/string_search.h"
 
 static inline bool is_strix_null(const strix_t *strix)
 {
@@ -537,9 +535,115 @@ position_t *strix_find_subtrix_all(const strix_t *strix_one, const strix_t *stri
 
 void strix_position_free(position_t *position)
 {
-    deallocate(position->pos);
-    deallocate(position);
+    free(position->pos);
+    free(position);
 }
+
+void strix_free_strix_arr(strix_arr_t *strix_arr)
+{
+    for (size_t counter = 0; counter < strix_arr->len; counter++)
+    {
+        deallocate(strix_arr->strix_arr[counter]);
+    }
+
+    deallocate(strix_arr->strix_arr);
+    deallocate(strix_arr);
+}
+
+strix_t *strix_slice(const strix_t *strix, size_t start, size_t end)
+{
+    if (start > end || end >= strix->len || is_strix_null(strix))
+    {
+        strix_errno = start > end || end >= strix->len ? STRIX_ERR_INVALID_LENGTH : STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    strix_t *slice = (strix_t *)allocate(sizeof(strix_t));
+    if (is_strix_null(slice))
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    slice->len = end - start + 1;
+    slice->str = (char *)allocate(sizeof(char) * slice->len);
+    if (!slice->str)
+    {
+        deallocate(slice);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    void *result = memcpy(slice->str, strix->str + start, slice->len);
+    if (!result)
+    {
+        deallocate(slice->str);
+        deallocate(slice);
+        strix_errno = STRIX_ERR_MEMCPY_FAILED;
+        return NULL;
+    }
+
+    return slice;
+}
+
+strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim)
+{
+    if (is_strix_null(strix) || is_strix_str_null(strix))
+    {
+        strix_errno = is_strix_null(strix) ? STRIX_ERR_NULL_PTR : STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+    strix_arr_t *strix_arr_struct = (strix_arr_t *)allocate(sizeof(strix_arr_t));
+    if (!strix_arr_struct)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    strix_t **strix_arr = (strix_t **)allocate(sizeof(strix_t *) * MAX_SUBSTRIX_NUM);
+    if (!strix_arr)
+    {
+        deallocate(strix_arr_struct);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    size_t len = 0;
+    size_t j = 0;
+
+    for (size_t i = 0; i <= strix->len; i++)
+    {
+        if (i == strix->len || strix->str[i] == delim)
+        {
+            if (i != j)
+            {
+
+                strix_t *substrix = strix_slice(strix, j, i - 1);
+                if (is_strix_null(substrix))
+                {
+                    for (size_t k = 0; k < len; k++)
+                    {
+                        deallocate(strix_arr[k]->str);
+                        deallocate(strix_arr[k]);
+                    }
+                    deallocate(strix_arr);
+                    deallocate(strix_arr_struct);
+                    return NULL;
+                }
+                strix_arr[len++] = substrix;
+            }
+            j = i + 1;
+        }
+    }
+
+    strix_arr_struct->len = len;
+    strix_arr_struct->strix_arr = strix_arr;
+    return strix_arr_struct;
+}
+
+#undef MAX_SUBSTRIX_NUM
+#undef MAX_POSITIONS
 
 int main(void)
 {
@@ -584,6 +688,15 @@ int main(void)
     strix_erase(strix, 100, 3);
     fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(strix));
     fprintf(stdout, "%d\n", strix_equal(strix_create("hello"), strix_create("hello\n")));
+
+    strix_t *new = strix_create("\n\n\n\nhelloworldkaise\nho\nsab\n\n\n");
+    strix_arr_t *arr = strix_split_by_delim(new, '\n');
+    fprintf(stdout, "%p\n", arr);
+
+    for (size_t counter = 0; counter < arr->len; counter++)
+    {
+        fprintf(stdout, STRIX_FORMAT "\n", STRIX_PRINT(arr->strix_arr[counter]));
+    }
 
     strix_free(strix);
     strix_free(world);

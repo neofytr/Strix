@@ -1,6 +1,4 @@
 #include "../header/string_search.h"
-#include "../allocator/allocator.h"
-#include "../header/strix_errno.h"
 
 int64_t kmp_search(const char *pattern, const char *string, size_t pattern_len, size_t string_len)
 {
@@ -68,14 +66,14 @@ position_t *kmp_search_all(const char *pattern, const char *string, size_t patte
     size_t lps[pattern_len];
     int64_t counter = 0;
 
-    position_t *position = (position_t *)allocate(sizeof(position));
+    position_t *position = (position_t *)malloc(sizeof(position));
     if (!position)
     {
         strix_errno = STRIX_ERR_MALLOC_FAILED;
         return NULL;
     }
 
-    size_t *pos_arr = (size_t *)allocate(sizeof(size_t) * MAX_POSITIONS);
+    size_t *pos_arr = (size_t *)malloc(sizeof(size_t) * MAX_POSITIONS);
     if (!pos_arr)
     {
         strix_errno = STRIX_ERR_MALLOC_FAILED;

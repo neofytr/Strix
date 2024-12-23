@@ -5,8 +5,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "../allocator/allocator.h"
 #include "string_search.h"
+#include "../allocator/allocator.h"
 
 /**
  * @brief String handling structure that stores both the string and its length
@@ -153,6 +153,20 @@ void strix_position_free(position_t *position);
 int64_t strix_find_subtrix(const strix_t *strix_one, const strix_t *strix_two);
 
 position_t *strix_find_subtrix_all(const strix_t *strix_one, const strix_t *strix_two);
+
+#define MAX_SUBSTRIX_NUM 2048
+
+typedef struct
+{
+    strix_t **strix_arr;
+    size_t len;
+} strix_arr_t;
+
+strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim);
+
+void strix_free_strix_arr(strix_arr_t *strix_arr);
+
+strix_t *strix_slice(const strix_t *strix, size_t start, size_t end);
 
 void strix_free(strix_t *string);
 
