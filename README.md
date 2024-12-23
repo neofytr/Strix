@@ -8,7 +8,6 @@ A modern, efficient, and thread-safe C library for string manipulation that goes
 
 - 🔒 Thread-safe error handling
 - 📏 Explicit length tracking
-- 🔄 Binary data support
 - 🎯 Custom memory allocation
 - 🛡️ Robust error checking
 - 🧵 Safe string manipulation
@@ -39,7 +38,23 @@ typedef struct {
 } strix_arr_t;
 ```
 
+## Macros
+
+### `STRIX_FORMAT`
+
+Format macro for printf-style functions to print strix_t objects.
+
+### `STRIX_PRINT(strix)`
+
+Expands to length and strix pointer for use with STRIX_FORMAT.
+
+Example usage to print a strix string:
+
+`printf("strix string: "STRIX_FORMAT"\n", STRIX_PRINT(strix));`
+
 ## 📚 API Reference
+
+For detailed API reference, consult the file: `/header/strix.h`
 
 ### String Creation and Management
 
@@ -99,31 +114,75 @@ int main() {
 }
 ```
 
-## ⚠️ Error Handling
+### Error Handling
 
-Strix provides thread-safe error handling through error codes and descriptive messages:
+The **Strix String Manipulation Library** integrates a robust and thread-safe error-handling system to manage various failure scenarios. 
 
+For detailed reference to the error-handling system, consult the file:
+
+`/header/strix_errno.h`
+
+### Error Codes
+The `strix_error_t` enumeration defines all possible error codes that may be returned by the library functions:
+
+| Error Code                        | Description                                    |
+|-----------------------------------|------------------------------------------------|
+| `STRIX_SUCCESS`                   | Operation completed successfully              |
+| `STRIX_ERR_NULL_PTR`              | Null pointer passed as argument               |
+| `STRIX_ERR_MALLOC_FAILED`         | Dynamic memory allocation operation failed    |
+| `STRIX_ERR_MEMCPY_FAILED`         | Memory copy operation failed                  |
+| `STRIX_ERR_MEMMOVE_FAILED`        | Memory move operation failed                  |
+| `STRIX_ERR_INVALID_LENGTH`        | Invalid string length specified or computed   |
+| `STRIX_ERR_EMPTY_STRING`          | Empty string provided where non-empty required|
+| `STRIX_ERR_STRIX_STR_NULL`        | Null string in the strix structure provided   |
+| `STRIX_ERR_INVALID_POS`           | Invalid strix string position provided        |
+| `STRIX_ERR_OUT_OF_BOUNDS_ACCESS`  | Out of bounds element access                  |
+| `STRIX_ERR_INVALID_BOUNDS`        | Invalid bounds given for slicing              |
+
+### Thread-Local Error State
+Each thread maintains its own independent error state in the `strix_errno` variable, initialized to `STRIX_SUCCESS`. This ensures thread safety and allows simultaneous operations across multiple threads without interference.
+
+### Error Messages
+The library provides a static array of human-readable error messages, indexed by their corresponding error codes:
+
+```c
+static const char *strix_error_messages[] = {
+    "Success",
+    "Null pointer argument",
+    "Memory allocation failed",
+    "Memory copy operation failed",
+    "Memory move operation failed",
+    "Invalid string length",
+    "Empty string where not allowed",
+    "Null string in the strix structure provided",
+    "Invalid strix string position provided",
+    "Out of bounds element access",
+    "Invalid bounds given for slicing",
+};
+```
+
+### Error Handling API
+#### `void strix_perror(const char *prefix)`
+Prints a formatted error message to `stderr`, combining the provided prefix and the descriptive error message corresponding to the current `strix_errno` value.
+
+**Example Usage:**
 ```c
 if (!strix_some_function(s)) {
     strix_perror("Failed to process string");
-    // Outputs: "Failed to process string: <error message>"
+    // Output: "Failed to process string: <error message>"
 }
 ```
 
-### Error Codes
+#### `strix_error_t strix_get_error(void)`
+Retrieves the current error code stored in the thread-local `strix_errno`.
 
-| Error Code | Description |
-|------------|-------------|
-| `STRIX_SUCCESS` | Operation completed successfully |
-| `STRIX_ERR_NULL_PTR` | Null pointer passed as argument |
-| `STRIX_ERR_MALLOC_FAILED` | Memory allocation failed |
-| `STRIX_ERR_MEMCPY_FAILED` | Memory copy operation failed |
-| `STRIX_ERR_INVALID_LENGTH` | Invalid string length |
-| `STRIX_ERR_EMPTY_STRING` | Empty string provided |
-| `STRIX_ERR_STRIX_STR_NULL` | Null string in the strix structure provided |
-| `STRIX_ERR_INVALID_POS` | Invalid strix string position provided |
-| `STRIX_ERR_OUT_OF_BOUNDS_ACCESS` | Out of bounds element access |
-| `STRIX_ERR_INVALID_BOUNDS` | Invalid bounds given for slicing |
+**Example Usage:**
+```c
+if (strix_get_error() == STRIX_ERR_MALLOC_FAILED) {
+    // Handle memory allocation failure
+}
+```
+
 
 ## 📄 License
 
