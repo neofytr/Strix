@@ -1418,3 +1418,45 @@ int64_t strix_count_substrix(const strix_t *strix, const strix_t *substrix)
 
     return kmp_search_all_len(substrix->str, strix->str, substrix->len, strix->len);
 }
+
+strix_t *strix_slice_by_stride(const strix_t *strix, size_t start, size_t end, size_t stride)
+{
+    if (start > end || end >= strix->len || is_strix_null(strix))
+    {
+        strix_errno = start > end || end >= strix->len ? STRIX_ERR_INVALID_BOUNDS : STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    if (stride == 0)
+    {
+        strix_errno = STRIX_ERR_INVALID_STRIDE;
+        return NULL;
+    }
+
+    size_t range = end - start + 1;
+    size_t slice_len = (range + stride - 1) / stride; // Ceiling division
+
+    strix_t *slice = (strix_t *)allocate(sizeof(strix_t));
+    if (is_strix_null(slice))
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    slice->len = slice_len;
+    slice->str = (char *)allocate(sizeof(char) * slice_len);
+    if (!slice->str)
+    {
+        deallocate(slice);
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    for (size_t i = 0, src_idx = start; i < slice_len; i++, src_idx += stride)
+    {
+        slice->str[i] = strix->str[src_idx];
+    }
+
+    strix_errno = STRIX_SUCCESS;
+    return slice;
+}

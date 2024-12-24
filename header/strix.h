@@ -517,6 +517,26 @@ int64_t strix_count_substr(const strix_t *strix, const char *substr);
  */
 int64_t strix_count_substrix(const strix_t *strix, const strix_t *substrix);
 
-// they return -1 on error and count otherwise
+/**
+ * @brief Creates a new strix_t containing characters from start to end with the given stride
+ *
+ * This function creates a new strix_t structure containing characters from the source strix,
+ * starting at 'start', ending at 'end' (inclusive), and taking every 'stride'th character.
+ * For example, with stride=2, it would take every second character.
+ *
+ * @param strix Pointer to the source strix_t structure
+ * @param start Starting index in the source string (inclusive)
+ * @param end Ending index in the source string (inclusive)
+ * @param stride Step size between characters to include
+ * @return strix_t* Pointer to the new strix_t structure, or NULL if there is an error
+ *
+ * Errors:
+ * - Returns NULL if strix is NULL (sets STRIX_ERR_NULL_PTR)
+ * - Returns NULL if start > end or end >= strix->len (sets STRIX_ERR_INVALID_BOUNDS)
+ * - Returns NULL if stride is 0 (sets STRIX_ERR_INVALID_STRIDE)
+ * - Returns NULL if memory allocation fails (sets STRIX_ERR_MALLOC_FAILED)
+ * - Returns NULL if memory copy fails (sets STRIX_ERR_MEMCPY_FAILED)
+ */
+strix_t *strix_slice_by_stride(const strix_t *strix, size_t start, size_t end, size_t stride);
 
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */
