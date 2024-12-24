@@ -61,7 +61,7 @@ int64_t kmp_search(const char *pattern, const char *string, size_t pattern_len, 
     return -2;
 }
 
-int64_t *kmp_search_all_len(const char *pattern, const char *string, size_t pattern_len, size_t string_len)
+int64_t kmp_search_all_len(const char *pattern, const char *string, size_t pattern_len, size_t string_len)
 {
     size_t lps[pattern_len];
     int64_t counter = 0;
