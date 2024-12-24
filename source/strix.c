@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "../header/strix.h"
+#include "../allocator/allocator.h"
 
 static inline bool is_strix_null(const strix_t *strix)
 {

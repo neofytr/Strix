@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "string_search.h"
-#include "../allocator/allocator.h"
+#include <stdbool.h>
 
 /**
  * @brief String handling structure that stores both the string and its length
