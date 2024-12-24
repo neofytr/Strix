@@ -552,7 +552,6 @@ void strix_free_strix_arr(strix_arr_t *strix_arr)
         deallocate(strix_arr->strix_arr[counter]);
     }
 
-    deallocate(strix_arr->strix_arr);
     deallocate(strix_arr);
 }
 
