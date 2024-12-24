@@ -469,4 +469,54 @@ int64_t strix_to_signed_int(strix_t *strix);
  */
 uint64_t strix_to_unsigned_int(strix_t *strix);
 
+/**
+ * @brief Counts the occurrences of a specific character in a strix_t
+ *
+ * This function counts how many times the specified character appears in the string contained in the given strix_t structure.
+ * It returns the count of occurrences, or -1 in case of an error.
+ *
+ * @param strix Pointer to the strix_t structure to analyze
+ * @param chr The character to count within the strix_t string
+ * @return int64_t The count of the specified character, or -1 if there is an error
+ *
+ * Errors:
+ * - Returns -1 if the strix_t pointer is NULL or the string is invalid
+ * - Additional error information should be handled externally
+ */
+int64_t strix_count_char(const strix_t *strix, const char chr);
+
+/**
+ * @brief Counts the occurrences of a specific substring in a strix_t
+ *
+ * This function counts how many times the specified substring appears within the string of the given strix_t structure.
+ * It returns the count of occurrences, or -1 in case of an error.
+ *
+ * @param strix Pointer to the strix_t structure to analyze
+ * @param substr Pointer to the null-terminated string representing the substring to count
+ * @return int64_t The count of the specified substring, or -1 if there is an error
+ *
+ * Errors:
+ * - Returns -1 if the strix_t or substr pointer is NULL, or the substring is invalid
+ * - Additional error information should be handled externally
+ */
+int64_t strix_count_substr(const strix_t *strix, const char *substr);
+
+/**
+ * @brief Counts the occurrences of a specific substring represented by another strix_t
+ *
+ * This function counts how many times the specified strix_t (substrix) appears within the string of the given strix_t structure.
+ * It returns the count of occurrences, or -1 in case of an error.
+ *
+ * @param strix Pointer to the strix_t structure to analyze
+ * @param substrix Pointer to the strix_t structure representing the substring to count
+ * @return int64_t The count of the specified substring, or -1 if there is an error
+ *
+ * Errors:
+ * - Returns -1 if either strix or substrix is NULL, or the substrix string is invalid
+ * - Additional error information should be handled externally
+ */
+int64_t strix_count_substrix(const strix_t *strix, const strix_t *substrix);
+
+// they return -1 on error and count otherwise
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

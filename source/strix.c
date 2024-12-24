@@ -1361,3 +1361,61 @@ int64_t strix_to_signed_int(strix_t *strix)
 
     return is_neg ? -num : num;
 }
+
+int64_t strix_count_char(const strix_t *strix, const char chr)
+{
+    if (is_strix_null(strix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return -1;
+    }
+
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return -1;
+    }
+
+    int64_t count = 0;
+    for (size_t counter = 0; counter < strix->len; counter++)
+    {
+        if (strix->str[counter] == chr)
+        {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+int64_t strix_count_substr(const strix_t *strix, const char *substr)
+{
+    if (is_strix_null(strix) || is_str_null(substr))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return -1;
+    }
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return -1;
+    }
+
+    return kmp_search_all_len(substr, strix->str, strlen(substr), strix->len);
+}
+
+int64_t strix_count_substrix(const strix_t *strix, const strix_t *substrix)
+{
+    if (is_strix_null(strix) || is_strix_null(substrix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return -1;
+    }
+    if (is_strix_str_null(strix) || is_strix_str_null(substrix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return -1;
+    }
+
+    return kmp_search_all_len(substrix->str, strix->str, substrix->len, strix->len);
+}

@@ -16,5 +16,7 @@ typedef struct
 
 int64_t kmp_search(const char *pattern, const char *string, size_t pattern_len, size_t string_len);
 position_t *kmp_search_all(const char *pattern, const char *string, size_t pattern_len, size_t string_len);
+int64_t *kmp_search_all_len(const char *pattern, const char *string, size_t pattern_len, size_t string_len);
+
 
 #endif /* B9E1623A_048D_4A91_B58A_7134761C791E */
