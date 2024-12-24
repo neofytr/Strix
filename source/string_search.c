@@ -180,7 +180,7 @@ position_t *kmp_search_all(const char *pattern, const char *string, size_t patte
             if (j == pattern_len)
             {
                 j = lps[j - 1]; // the search can be continued using this, but i return after finding the first match
-                pos_arr[counter++] = i - j - 1;
+                pos_arr[counter++] = i - j - pattern_len;
             }
         }
         else
