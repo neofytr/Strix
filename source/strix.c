@@ -1464,3 +1464,58 @@ strix_t *strix_slice_by_stride(const strix_t *strix, size_t start, size_t end, s
     strix_errno = STRIX_SUCCESS;
     return slice;
 }
+
+typedef struct
+{
+    char *unique_char_arr;
+    size_t len;
+} char_arr_t;
+
+char_arr_t *strix_find_unique_char(strix_t *strix)
+{
+    if (is_strix_null(strix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+#define MAX_UNIQUE 128
+
+    char *unique_char_arr = (char *)allocate(MAX_UNIQUE * sizeof(char));
+    if (!unique_char_arr)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    char_arr_t *char_arr = (char_arr_t *)allocate(sizeof(char_arr_t));
+    if (!char_arr)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+
+    char_arr->len = 0;
+    char_arr->unique_char_arr = unique_char_arr;
+
+    bool found[MAX_UNIQUE] = {false};
+
+    for (size_t counter = 0; counter < strix->len; counter++)
+    {
+        if (!found[strix->str[counter]])
+        {
+            found[strix->str[counter]] = true;
+            char_arr->unique_char_arr[char_arr->len++] = strix->str[counter];
+        }
+    }
+
+    return char_arr;
+}
+
+#undef MAX_UNIQUE
