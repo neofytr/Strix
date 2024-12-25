@@ -541,4 +541,12 @@ strix_t *strix_slice_by_stride(const strix_t *strix, size_t start, size_t end, s
 
 bool strix_delete_occurence(strix_t *strix, const char *substr);
 
+typedef struct
+{
+    char *unique_char_arr;
+    size_t len;
+} char_arr_t;
+
+char_arr_t *strix_find_unique_char(strix_t *strix);
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */
