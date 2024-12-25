@@ -1519,3 +1519,72 @@ char_arr_t *strix_find_unique_char(strix_t *strix)
 }
 
 #undef MAX_UNIQUE
+
+bool strix_delete_occurence(strix_t *strix, const char *substr)
+{
+    if (is_strix_null(strix) || is_str_null(substr))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return false;
+    }
+
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return false;
+    }
+
+    position_t *positions = strix_find_all(strix, substr);
+    if (positions == NULL)
+    {
+        strix_errno = STRIX_SUCCESS;
+        return true;
+    }
+
+    size_t substr_len = strlen(substr);
+    size_t new_len = strix->len - (substr_len * positions->len);
+
+    char *new_str = (char *)allocate((new_len + 1) * sizeof(char));
+    if (new_str == NULL)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
+    }
+
+    size_t current_pos = 0;
+    size_t copy_pos = 0;
+
+    for (int64_t i = 0; i < positions->len; i++)
+    {
+        size_t substr_pos = positions->pos[i];
+        size_t copy_len = substr_pos - current_pos;
+
+        if (memcpy(new_str + copy_pos, strix->str + current_pos, copy_len) == NULL)
+        {
+            deallocate(new_str);
+            strix_errno = STRIX_ERR_MEMCPY_FAILED;
+            return false;
+        }
+
+        copy_pos += copy_len;
+        current_pos = substr_pos + substr_len;
+    }
+
+    if (current_pos < strix->len)
+    {
+        if (memcpy(new_str + copy_pos, strix->str + current_pos, strix->len - current_pos) == NULL)
+        {
+            deallocate(new_str);
+            strix_errno = STRIX_ERR_MEMCPY_FAILED;
+            return false;
+        }
+    }
+
+    new_str[new_len] = '\0';
+    deallocate(strix->str);
+    strix->str = new_str;
+    strix->len = new_len;
+
+    strix_errno = STRIX_SUCCESS;
+    return true;
+}
