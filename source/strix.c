@@ -1592,3 +1592,49 @@ void strix_free_char_arr(char_arr_t *char_arr)
     deallocate(char_arr->unique_char_arr);
     deallocate(char_arr);
 }
+
+position_t *strix_find_all_char(const strix_t *strix, const char chr)
+{
+    if (is_strix_null(strix))
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    if (is_strix_str_null(strix))
+    {
+        strix_errno = STRIX_ERR_STRIX_STR_NULL;
+        return NULL;
+    }
+
+    position_t *posn = (position_t *)malloc(sizeof(position_t));
+    if (!posn)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return false;
+    }
+
+#define MAX_POSITIONS 1024
+    size_t *pos_arr = (size_t *)malloc(sizeof(size_t) * MAX_POSITIONS);
+    if (!pos_arr)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        return NULL;
+    }
+#undef MAX_POSITIONS
+
+    size_t len = 0;
+
+    for (size_t counter = 0; counter < strix->len; counter++)
+    {
+        if (strix->str[counter] == chr)
+        {
+            pos_arr[len++] = counter;
+        }
+    }
+
+    posn->pos = pos_arr;
+    posn->len = len;
+
+    return posn;
+}
