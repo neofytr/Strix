@@ -549,4 +549,6 @@ typedef struct
 
 char_arr_t *strix_find_unique_char(strix_t *strix);
 
+void strix_free_char_arr(char_arr_t *char_arr);
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

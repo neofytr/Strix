@@ -1582,3 +1582,14 @@ bool strix_delete_occurence(strix_t *strix, const char *substr)
     strix_errno = STRIX_SUCCESS;
     return true;
 }
+
+void strix_free_char_arr(char_arr_t *char_arr)
+{
+    if (!char_arr || !char_arr->unique_char_arr)
+    {
+        return;
+    }
+
+    deallocate(char_arr->unique_char_arr);
+    deallocate(char_arr);
+}
