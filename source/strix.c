@@ -1538,7 +1538,7 @@ bool strix_delete_occurence(strix_t *strix, const char *substr)
     size_t substr_len = strlen(substr);
     size_t new_len = strix->len - (substr_len * positions->len);
 
-    char *new_str = (char *)allocate((new_len + 1) * sizeof(char));
+    char *new_str = (char *)allocate((new_len) * sizeof(char));
     if (new_str == NULL)
     {
         strix_errno = STRIX_ERR_MALLOC_FAILED;
@@ -1574,7 +1574,6 @@ bool strix_delete_occurence(strix_t *strix, const char *substr)
         }
     }
 
-    new_str[new_len] = '\0';
     deallocate(strix->str);
     strix->str = new_str;
     strix->len = new_len;
