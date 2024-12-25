@@ -547,11 +547,15 @@ void strix_position_free(position_t *position)
 
 void strix_free_strix_arr(strix_arr_t *strix_arr)
 {
+    if (!strix_arr)
+        return;
+
     for (size_t counter = 0; counter < strix_arr->len; counter++)
     {
-        deallocate(strix_arr->strix_arr[counter]);
+        strix_free(strix_arr->strix_arr[counter]);
     }
 
+    deallocate(strix_arr->strix_arr);
     deallocate(strix_arr);
 }
 
