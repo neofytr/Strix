@@ -1639,7 +1639,7 @@ position_t *strix_find_all_char(const strix_t *strix, const char chr)
     return posn;
 }
 
-strix_t *conv_file_to_txt(const char *file_path)
+strix_t *conv_file_to_strix(const char *file_path)
 {
     if (!file_path)
     {
