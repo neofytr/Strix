@@ -1638,3 +1638,68 @@ position_t *strix_find_all_char(const strix_t *strix, const char chr)
 
     return posn;
 }
+
+strix_t *conv_file_to_txt(const char *file_path)
+{
+    if (!file_path)
+    {
+        strix_errno = STRIX_ERR_NULL_PTR;
+        return NULL;
+    }
+
+    FILE *input_file = fopen(file_path, "r");
+    if (!input_file)
+    {
+        strix_errno = STRIX_ERR_STDIO;
+        return NULL;
+    }
+
+    if (fseek(input_file, 0, SEEK_END) != 0)
+    {
+        strix_errno = STRIX_ERR_STDIO;
+        return NULL;
+    }
+
+    long input_file_len = ftell(input_file);
+    if (input_file_len < 0)
+    {
+        strix_errno = STRIX_ERR_STDIO;
+        fclose(input_file);
+        return NULL;
+    }
+
+    if (fseek(input_file, 0, SEEK_SET) != 0)
+    {
+        strix_errno = STRIX_ERR_STDIO;
+        fclose(input_file);
+        return NULL;
+    }
+
+    uint8_t *input_file_array = (uint8_t *)allocate((input_file_len + 1) * sizeof(uint8_t));
+    if (!input_file_array)
+    {
+        strix_errno = STRIX_ERR_MALLOC_FAILED;
+        fclose(input_file);
+        return NULL;
+    }
+    input_file_array[input_file_len] = '\0';
+
+    size_t bytes_read = fread(input_file_array, 1, input_file_len, input_file);
+    if (bytes_read != (size_t)input_file_len)
+    {
+        strix_errno = STRIX_ERR_STDIO;
+        deallocate(input_file_array);
+        fclose(input_file);
+        return NULL;
+    }
+    fclose(input_file);
+
+    strix_t *input_strix = strix_create((const char *)input_file_array);
+    deallocate(input_file_array);
+    if (!input_strix)
+    {
+        return NULL;
+    }
+
+    return input_strix;
+}

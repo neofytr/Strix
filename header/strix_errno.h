@@ -26,7 +26,8 @@ typedef enum
     STRIX_ERR_INVALID_DOUBLE,       ///< Invalid double value in the strix string
     STRIX_ERR_INVALID_INT,          ///< Invalid int value in the strix string
     STRIX_ERR_INT_OVERFLOW,         ///< Integer in the strix string overflows 8 bytes
-    STRIX_ERR_INVALID_STRIDE        ///< Invalid stride given
+    STRIX_ERR_INVALID_STRIDE,       ///< Invalid stride given
+    STRIX_ERR_STDIO,                ///< Error from the stdio library while doing operations on the given file\nSee thread local errno for more information on the error
 } strix_error_t;
 
 /* _Thread_local has been supported since C11 */
@@ -63,7 +64,7 @@ static const char *strix_error_messages[] = {
     "Invalid int value in the strix string",
     "Integer in the strix string overflows 8 bytes",
     "Invalid stride given",
-};
+    "Error from the stdio library while doing operations on the given file\nSee thread local errno for more information on the error"};
 
 /**
  * @brief Prints a formatted error message to stderr
