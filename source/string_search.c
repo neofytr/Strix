@@ -127,24 +127,25 @@ position_t *kmp_search_all(const char *pattern, const char *string, size_t patte
 {
     size_t lps[pattern_len];
     int64_t counter = 0;
+    size_t current_max_positions = MAX_POSITIONS;
 
-    position_t *position = (position_t *)malloc(sizeof(position));
+    position_t *position = (position_t *)malloc(sizeof(position_t));
     if (!position)
     {
         strix_errno = STRIX_ERR_MALLOC_FAILED;
         return NULL;
     }
 
-    size_t *pos_arr = (size_t *)malloc(sizeof(size_t) * MAX_POSITIONS);
+    size_t *pos_arr = (size_t *)malloc(sizeof(size_t) * current_max_positions);
     if (!pos_arr)
     {
+        free(position);
         strix_errno = STRIX_ERR_MALLOC_FAILED;
         return NULL;
     }
 
     size_t i = 1, j = 0;
     lps[0] = 0;
-
     while (i < pattern_len)
     {
         if (pattern[i] == pattern[j])
@@ -169,18 +170,30 @@ position_t *kmp_search_all(const char *pattern, const char *string, size_t patte
 
     i = 0;
     j = 0;
-
     while (i < string_len)
     {
         if (pattern[j] == string[i])
         {
             j++;
             i++;
-
             if (j == pattern_len)
             {
-                j = lps[j - 1]; // the search can be continued using this, but i return after finding the first match
-                pos_arr[counter++] = i - j - pattern_len;
+                if (counter >= current_max_positions)
+                {
+                    current_max_positions *= 2; // double the size
+                    size_t *new_pos_arr = (size_t *)realloc(pos_arr, sizeof(size_t) * current_max_positions);
+                    if (!new_pos_arr)
+                    {
+                        free(pos_arr);
+                        free(position);
+                        strix_errno = STRIX_ERR_MALLOC_FAILED;
+                        return NULL;
+                    }
+                    pos_arr = new_pos_arr;
+                }
+
+                j = lps[j - 1];
+                pos_arr[counter++] = i - pattern_len;
             }
         }
         else
@@ -198,8 +211,18 @@ position_t *kmp_search_all(const char *pattern, const char *string, size_t patte
 
     if (!counter)
     {
+        free(pos_arr);
         position->len = -2;
         return position;
+    }
+
+    if (current_max_positions > counter)
+    {
+        size_t *new_pos_arr = (size_t *)realloc(pos_arr, sizeof(size_t) * counter);
+        if (new_pos_arr)
+        {
+            pos_arr = new_pos_arr;
+        }
     }
 
     position->len = counter;
