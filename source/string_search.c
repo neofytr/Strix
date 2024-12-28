@@ -125,7 +125,6 @@ int64_t kmp_search_all_len(const char *pattern, const char *string, size_t patte
 
 position_t *kmp_search_all(const char *pattern, const char *string, size_t pattern_len, size_t string_len)
 {
-    // Input validation
     if (!pattern || !string || pattern_len == 0 || pattern_len > string_len)
     {
         strix_errno = STRIX_ERR_NULL_PTR;

@@ -611,7 +611,8 @@ strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim)
         return NULL;
     }
 
-    strix_t **strix_arr = (strix_t **)allocate(sizeof(strix_t *) * MAX_SUBSTRIX_NUM);
+    size_t current_max_size = MAX_SUBSTRIX_NUM;
+    strix_t **strix_arr = (strix_t **)allocate(sizeof(strix_t *) * current_max_size);
     if (!strix_arr)
     {
         deallocate(strix_arr_struct);
@@ -628,6 +629,32 @@ strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim)
         {
             if (i != j)
             {
+                if (len >= current_max_size)
+                {
+                    size_t new_size = current_max_size * 2;
+                    strix_t **new_arr = (strix_t **)allocate(sizeof(strix_t *) * new_size);
+                    if (!new_arr)
+                    {
+                        for (size_t k = 0; k < len; k++)
+                        {
+                            deallocate(strix_arr[k]->str);
+                            deallocate(strix_arr[k]);
+                        }
+                        deallocate(strix_arr);
+                        deallocate(strix_arr_struct);
+                        strix_errno = STRIX_ERR_MALLOC_FAILED;
+                        return NULL;
+                    }
+
+                    for (size_t k = 0; k < len; k++)
+                    {
+                        new_arr[k] = strix_arr[k];
+                    }
+
+                    deallocate(strix_arr);
+                    strix_arr = new_arr;
+                    current_max_size = new_size;
+                }
 
                 strix_t *substrix = strix_slice(strix, j, i - 1);
                 if (is_strix_null(substrix))
@@ -644,6 +671,20 @@ strix_arr_t *strix_split_by_delim(const strix_t *strix, const char delim)
                 strix_arr[len++] = substrix;
             }
             j = i + 1;
+        }
+    }
+
+    if (len < current_max_size / 2)
+    {
+        strix_t **new_arr = (strix_t **)allocate(sizeof(strix_t *) * len);
+        if (new_arr)
+        {
+            for (size_t k = 0; k < len; k++)
+            {
+                new_arr[k] = strix_arr[k];
+            }
+            deallocate(strix_arr);
+            strix_arr = new_arr;
         }
     }
 
