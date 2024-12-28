@@ -555,4 +555,6 @@ position_t *strix_find_all_char(const strix_t *strix, const char chr);
 
 strix_t *conv_file_to_strix(const char *file_path);
 
+void strix_free_position(position_t *pos);
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

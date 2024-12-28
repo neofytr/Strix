@@ -54,7 +54,9 @@ Example usage to print a strix string:
 
 ## 📚 API Reference
 
-For detailed API reference, consult the file: `/header/strix.h`
+THIS IS NOT THE COMPLETE API, THERE ARE MANY MORE FUNCTIONS.
+
+For the complete detailed API reference , consult the file: `/header/strix.h`
 
 ### String Creation and Management
 
@@ -134,6 +136,8 @@ int main() {
 ### Error Handling
 
 The **Strix String Manipulation Library** integrates a robust and thread-safe error-handling system to manage various failure scenarios. 
+
+THE FOLLOWING DESCRIPTION IS NOT EXHAUSTIVE
 
 For detailed reference to the error-handling system, consult the file:
 

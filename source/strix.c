@@ -1703,3 +1703,14 @@ strix_t *conv_file_to_strix(const char *file_path)
 
     return input_strix;
 }
+
+void strix_free_position(position_t *pos)
+{
+    if (!pos)
+    {
+        return;
+    }
+
+    free(pos->pos);
+    free(pos);
+}
