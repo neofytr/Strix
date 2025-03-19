@@ -559,4 +559,6 @@ char *strix_to_cstr(strix_t *strix); // cleanup of the string is up to the user;
 
 void strix_free_position(position_t *pos);
 
+strix_t *strix_create_empty(); // can't create empty with strix_create; but can with this
+
 #endif /* A4921AE8_DB77_42E3_A83E_9D3D0C69BDE0 */

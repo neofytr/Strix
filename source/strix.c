@@ -49,6 +49,15 @@ static inline bool is_strix_empty_or_null(const strix_t *strix)
     return is_strix_null(strix) || is_strix_empty(strix);
 }
 
+strix_t *strix_create_empty()
+{
+    char *str = allocate(0);
+    if (!str)
+    {
+        return NULL;
+    }
+}
+
 char *strix_to_cstr(strix_t *strix)
 {
     if (!strix)
@@ -85,7 +94,7 @@ strix_t *strix_create(const char *str)
     }
 
     strix->len = strlen(str);
-    if (strix->len == 0)
+    if (!strix->len)
     {
         strix_errno = STRIX_ERR_EMPTY_STRING;
         deallocate(strix);
@@ -242,7 +251,7 @@ bool strix_append(strix_t *strix, const char *str)
     }
 
     size_t str_len = strlen(str);
-    if (str_len == 0)
+    if (!str_len)
     {
         return true; // nothing to append, not an error
     }

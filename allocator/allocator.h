@@ -32,7 +32,6 @@ deallocator_t deallocate =
     custom_deallocator;
 #endif
 
-// Function definitions
 void *default_allocator(size_t size)
 {
     return malloc(size);
