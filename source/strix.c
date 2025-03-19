@@ -56,6 +56,16 @@ strix_t *strix_create_empty()
     {
         return NULL;
     }
+
+    strix_t *strix = (strix_t *)allocate(sizeof(strix_t));
+    if (!strix)
+    {
+        return NULL;
+    }
+
+    strix->str = str;
+    strix->len = 0;
+    return strix;
 }
 
 char *strix_to_cstr(strix_t *strix)
