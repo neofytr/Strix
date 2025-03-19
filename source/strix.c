@@ -62,6 +62,8 @@ char *strix_to_cstr(strix_t *strix)
         return NULL;
     }
 
+    memcpy(str, strix->str, strix->len);
+
     str[strix->len] = 0; // append null byte
     return str;
 }
