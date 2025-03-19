@@ -49,6 +49,23 @@ static inline bool is_strix_empty_or_null(const strix_t *strix)
     return is_strix_null(strix) || is_strix_empty(strix);
 }
 
+char *strix_to_cstr(strix_t *strix)
+{
+    if (!strix)
+    {
+        return NULL;
+    }
+
+    char *str = malloc(sizeof(char) * (strix->len + 1)); // + 1 for null byte
+    if (!str)
+    {
+        return NULL;
+    }
+
+    str[strix->len] = 0; // append null byte
+    return str;
+}
+
 strix_t *strix_create(const char *str)
 {
     strix_errno = STRIX_SUCCESS;
